@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<!-- core/templates/core/search.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Advanced Search</h1>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <form method="get" class="form-group">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search...">
+      <select name="university">
+        <option value="">All Universities</option>
+        {% for uni in universities %}
+          <option value="{{ uni.pk }}" {% if university == uni.pk|stringformat:"s" %}selected{% endif %}>{{ uni.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="subject">
+        <option value="">All Subjects</option>
+        {% for sub in subjects %}
+          <option value="{{ sub.pk }}" {% if subject == sub.pk|stringformat:"s" %}selected{% endif %}>{{ sub.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="year" value="{{ year }}" placeholder="Year">
+      <input type="number" name="price_min" value="{{ price_min }}" placeholder="Min Price">
+      <input type="number" name="price_max" value="{{ price_max }}" placeholder="Max Price">
+      <select name="sort">
+        <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price Asc</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price Desc</option>
+        <option value="year_asc" {% if sort == 'year_asc' %}selected{% endif %}>Year Asc</option>
+        <option value="year_desc" {% if sort == 'year_desc' %}selected{% endif %}>Year Desc</option>
+      </select>
+      <select name="view">
+        <option value="grid" {% if view == 'grid' %}selected{% endif %}>Grid</option>
+        <option value="list" {% if view == 'list' %}selected{% endif %}>List</option>
+      </select>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <div class="grid {% if view == 'grid' %}grid-3{% else %}grid-1{% endif %}">
+      {% for note in notes %}
+        <div class="card">
+          <h3>{{ note.subject.name }} - Note</h3>
+          <p><strong>Exam Type:</strong> {{ note.get_exam_type_display }}</p>
+          <p><strong>Year:</strong> {{ note.year }}</p>
+          <p><strong>Price:</strong> ${{ note.price }}</p>
+          <a href="{% url 'ecommerce:add_to_cart' note.pk %}" class="btn btn-primary">Add to Cart</a>
+        </div>
+      {% endfor %}
+      {% for paper in papers %}
+        <div class="card">
+          <h3>{{ paper.subject.name }} - Paper</h3>
+          <p><strong>Exam Type:</strong> {{ paper.get_exam_type_display }}</p>
+          <p><strong>Year:</strong> {{ paper.year }}</p>
+          <p><strong>Price:</strong> ${{ paper.price }}</p>
+          <a href="{% url 'ecommerce:add_to_cart' paper.pk %}" class="btn btn-primary">Add to Cart</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

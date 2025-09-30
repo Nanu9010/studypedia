@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Payment - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">Verify Payment</h2>
+            
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                <h4 style="margin-bottom: 0.5rem;">Purchase Details</h4>
+                <p style="margin-bottom: 0.25rem;"><strong>Item:</strong> {{ purchase.item.title }}</p>
+                <p style="margin-bottom: 0.25rem;"><strong>User:</strong> {{ purchase.user.username }} ({{ purchase.user.email }})</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Amount:</strong> ₹{{ purchase.amount_paid }} via {{ purchase.get_payment_method_display }}</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Reference:</strong> {{ purchase.payment_reference|default:"Not provided" }}</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Date:</strong> {{ purchase.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+            
+            {% if purchase.payment_screenshot %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Payment Proof</h4>
+                    <img src="{{ purchase.payment_screenshot.url }}" alt="Payment proof" 
+                         style="max-width: 100%; border-radius: 4px;">
+                </div>
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_admin_notes">Admin Notes</label>
+                    <textarea name="admin_notes" id="id_admin_notes" rows="3" 
+                              placeholder="Add any notes about this verification..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" name="action" value="approve" class="btn btn-primary">Approve Payment</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-secondary">Reject Payment</button>
+                    <a href="{% url 'adminapp:pending_payments' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

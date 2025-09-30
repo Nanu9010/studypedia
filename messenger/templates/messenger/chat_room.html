@@ -1,10 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Chat with @{{ other_participants.0.user.username }} - StudyPedia Messenger{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container-fluid p-0 h-100">
+    <div class="row h-100">
+        <div class="col-12 chat-room">
+            <div class="chat-header bg-dark p-3 d-flex align-items-center border-bottom border-dark">
+                <a href="{% url 'messenger:chat_list' %}" class="btn btn-link text-white mr-2">← Back</a>
+                <img src="{{ other_participants.0.user.profile_picture.url|default:'/static/img/default_profile.png' }}" alt="Avatar" class="rounded-circle mr-3" style="width: 40px; height: 40px;">
+                <div>
+                    <h6 class="mb-0 text-white">{{ other_participants.0.user.username }}</h6>
+                    <small class="text-muted">Online</small>
+                </div>
+                <a href="{% url 'videocall:create_private_room' other_participants.0.user.username %}" class="btn btn-success ml-auto">Video Call</a>
+            </div>
+            <div class="chat-messages" id="chat-messages" style="height: calc(100vh - 200px); overflow-y: auto;">
+                {% for message in messages %}
+                    <div class="message {% if message.user == user %}sent{% else %}received{% endif %} mb-3">
+                        <div class="message-content">
+                            <p class="mb-1">{{ message.content }}</p>
+                            {% if message.image %}
+                                <img src="{{ message.image.url }}" alt="Image" class="img-fluid" style="max-width: 200px; border-radius: 8px;">
+                            {% endif %}
+                            <small class="text-muted">{{ message.created_at|date:"H:i" }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="chat-input bg-dark p-3">
+                <form id="message-form" method="post" enctype="multipart/form-data" action="{% url 'messenger:send_message' room.id %}">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        {{ form.content }}
+                        {{ form.image }}
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+                <div id="typing-indicator" class="text-muted small mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const roomId = {{ room.id }};
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/messenger/${roomId}/`);
+    const messagesContainer = document.getElementById('chat-messages');
+    const typingIndicator = document.getElementById('typing-indicator');
 
-</body>
-</html>
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'message') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${data.user_id === {{ user.id }} ? 'sent' : 'received'} mb-3`;
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p class="mb-1">${data.content}</p>
+                    ${data.image ? `<img src="${data.image}" alt="Image" class="img-fluid" style="max-width: 200px; border-radius: 8px;">` : ''}
+                    <small class="text-muted">${new Date(data.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } else if (data.type === 'typing') {
+            typingIndicator.textContent = data.is_typing ? `${data.user} is typing...` : '';
+        }
+    };
+
+    document.getElementById('message-form').onsubmit = function(e) {
+        e.preventDefault();
+        const content = document.getElementById('id_content').value;
+        const image = document.querySelector('input[type="file"]').files[0];
+        const formData = new FormData(this);
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        }).then(() => {
+            document.getElementById('id_content').value = '';
+            document.querySelector('input[type="file"]').value = '';
+        });
+    };
+
+    let typingTimer;
+    document.getElementById('id_content').addEventListener('input', () => {
+        chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': true}));
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
+        }, 1000);
+    });
+</script>
+{% endblock %}

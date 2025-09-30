@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Chats - StudyPedia Messenger{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container-fluid p-0 h-100">
+    <div class="row h-100">
+        <div class="col-md-4 chat-sidebar bg-dark">
+            <div class="chat-header p-3 border-bottom border-dark">
+                <h5 class="text-white">Chats</h5>
+                <form method="get" class="mt-2">
+                    <input type="text" name="q" class="form-control" placeholder="Search chats..." value="{{ search_query|default:'' }}">
+                </form>
+                <a href="{% url 'messenger:create_group_chat' %}" class="btn btn-primary mt-2 w-100">New Group</a>
+            </div>
+            <div class="chat-list">
+                {% for room in page_obj %}
+                    <a href="{% url 'messenger:chat_room' room.id %}" class="chat-item d-block p-3 border-bottom border-dark text-white">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ room.participants.exclude(user=user).first.user.profile_picture.url|default:'/static/img/default_profile.png' }}" alt="Avatar" class="rounded-circle mr-3" style="width: 50px; height: 50px;">
+                            <div>
+                                <h6 class="mb-0">{{ room.participants.exclude(user=user).first.user.username }}</h6>
+                                <small class="text-muted">{{ room.messages.last.content|truncatechars:20 }}</small>
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <p class="text-center text-muted p-3">No chats yet. Start one from a profile!</p>
+                {% endfor %}
+            </div>
+            {% if page_obj.has_next %}
+                <div class="text-center p-3">
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-light">Load More</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8 chat-main bg-black">
+            <div class="no-chat text-center p-5 text-white">
+                <h4>Select a chat to start messaging</h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

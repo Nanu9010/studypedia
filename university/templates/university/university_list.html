@@ -1,10 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<!-- university/templates/university/university_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Universities</h1>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if user.is_staff %}
+      <a href="{% url 'university:university_create' %}" class="btn btn-primary">Create University</a>
+    {% endif %}
+    <div class="grid grid-3">
+      {% for university in universities %}
+        <div class="card">
+          <h3>{{ university.name }}</h3>
+          <p><strong>Abbreviation:</strong> {{ university.abbreviation }}</p>
+          <p><strong>Active:</strong> {{ university.is_active|yesno:"Yes,No" }}</p>
+          {% if user.is_staff %}
+            <a href="{% url 'university:university_update' university.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'university:university_delete' university.pk %}" class="btn btn-secondary" onclick="return confirm('Are you sure you want to delete {{ university.name }}?');">Delete</a>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>No universities found.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

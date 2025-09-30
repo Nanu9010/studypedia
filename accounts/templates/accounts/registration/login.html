@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <div style="max-width: 400px; margin: 0 auto;">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Login to StudentHub</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="message error">
+                        Please enter a correct username and password. Note that both fields may be case-sensitive.
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    <input type="text" name="username" id="id_username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    <input type="password" name="password" id="id_password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Login</button>
+
+                <div style="text-align: center;">
+                    <p style="color: #666;">Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

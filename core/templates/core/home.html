@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}StudyPedia - Educational Marketplace{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Hero Section (Marketplace Welcome) -->
+    <section class="hero">
+        <h1>Welcome to the StudyPedia Marketplace</h1>
+        <p>Explore and purchase high-quality study notes, solved papers, and roadmaps tailored to your academic needs.</p>
+        <div class="hero-buttons">
+            <a href="{% url 'ecommerce:marketplace' %}" class="btn btn-primary">Browse Marketplace</a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-secondary">Join Now</a>
+        </div>
+    </section>
+
+    <!-- Stats Section (Marketplace Dashboard) -->
+    <section class="stats">
+        <div class="stat-item">
+            <h2>{{ stats.total_notes }}</h2>
+            <p>Available Notes</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_papers }}</h2>
+            <p>Available Papers</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_universities }}</h2>
+            <p>Supported Universities</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_downloads }}</h2>
+            <p>Total Transactions</p>
+        </div>
+    </section>
+
+    <!-- Featured Content Section (Marketplace Grid) -->
+    <section class="featured">
+        <h2>Featured Items</h2>
+        <div class="resource-grid grid-3">
+            {% for note in featured_notes %}
+                <div class="resource-card">
+                    <img src="{{ note.image.url|default:'/static/img/default_resource.png' }}" alt="{{ note.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover;">
+                    <h3>{{ note.name }}</h3>
+                    <p>{{ note.branch.name }} ({{ note.branch.degree.name }})</p>
+                    <p><strong>Price:</strong> ₹{{ note.price }} | {{ note.credit_price }} Credits</p>
+                    <a href="{% url 'ecommerce:add_to_cart' note.pk %}?type=note" class="btn btn-primary">Add to Cart</a>
+                </div>
+            {% empty %}
+                <p>No featured notes available.</p>
+            {% endfor %}
+            {% for paper in featured_papers %}
+                <div class="resource-card">
+                    <img src="{{ paper.image.url|default:'/static/img/default_resource.png' }}" alt="{{ paper.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover;">
+                    <h3>{{ paper.name }} - {{ paper.get_exam_type_display }}</h3>
+                    <p>{{ paper.branch.name }} ({{ paper.branch.degree.name }})</p>
+                    <p><strong>Price:</strong> ₹{{ paper.price }} | {{ paper.credit_price }} Credits</p>
+                    <a href="{% url 'ecommerce:add_to_cart' paper.pk %}?type=paper" class="btn btn-primary">Add to Cart</a>
+                </div>
+            {% empty %}
+                <p>No featured papers available.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Call to Action (Marketplace Prompt) -->
+    <section class="cta">
+        <h2>Start Shopping Today!</h2>
+        <p>Join our marketplace and unlock premium educational resources.</p>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Create Free Account</a>
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    // Infinite Scroll for Marketplace Feed
+    let page = 2;
+    let loading = false;
+    window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight && !loading) {
+            loading = true;
+            fetch(`?page=${page}`)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.querySelector('.resource-grid').innerHTML;
+                    document.querySelector('.resource-grid').insertAdjacentHTML('beforeend', newContent);
+                    page++;
+                    loading = false;
+                })
+                .catch(() => loading = false);
+        }
+    });
+</script>
+{% endblock %}

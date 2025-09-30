@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Purchases{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">My Purchases</h2>
+
+  {% if orders %}
+  <div class="accordion" id="ordersAccordion">
+    {% for order in orders %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
+                type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse{{ forloop.counter }}">
+          Order {{ order.id }} — {{ order.status|title }} — {{ order.created_at|date:"M d, Y H:i" }}
+        </button>
+      </h2>
+      <div id="collapse{{ forloop.counter }}"
+           class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+           data-bs-parent="#ordersAccordion">
+        <div class="accordion-body">
+          <ul class="list-group">
+            {% for item in order.items.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ item.item.title }}
+              <span>
+                ₹{{ item.price_at_purchase }}
+                {% if item.credits_at_purchase %}
+                + {{ item.credits_at_purchase }} Credits
+                {% endif %}
+                × {{ item.quantity }}
+              </span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+    <h3>No orders found</h3>
+    <p class="text-muted">Browse notes and purchase content to see them here.</p>
+    <a href="{% url 'notes:list' %}" class="btn btn-primary">
+      Browse Notes
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

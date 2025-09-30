@@ -1,10 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<div class="container">
+  <h1>{% if serializer.instance %}Edit Syllabus{% else %}Create Syllabus{% endif %}</h1>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="form-group" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="id_name">Name:</label>
+      <input type="text" name="name" id="id_name" value="{{ serializer.data.name|default:'' }}" required>
+      {% if errors.name %}<span class="error">{{ errors.name|join:", " }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="id_code">Code:</label>
+      <input type="text" name="code" id="id_code" value="{{ serializer.data.code|default:'Auto-generated' }}" readonly>
+      {% if errors.code %}<span class="error">{{ errors.code|join:", " }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="id_pdf_file">File:</label>
+      <input type="file" name="pdf_file" id="id_pdf_file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.jpeg,.png,.zip" {% if not serializer.instance %}required{% endif %}>
+      {% if errors.pdf_file %}<span class="error">{{ errors.pdf_file|join:", " }}</span>{% endif %}
+      {% if serializer.instance and serializer.instance.pdf_file %}
+        <p>Current file: <a href="{{ serializer.instance.pdf_file.url }}" target="_blank">{{ serializer.instance.pdf_file.name }}</a></p>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="id_is_active">Active:</label>
+      <input type="checkbox" name="is_active" id="id_is_active" {% if serializer.data.is_active|default:True %}checked{% endif %}>
+      {% if errors.is_active %}<span class="error">{{ errors.is_active|join:", " }}</span>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+
+  <a href="{% url 'roadmaps:syllabus_list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+{% endblock %}

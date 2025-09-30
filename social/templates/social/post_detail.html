@@ -1,10 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Post Detail - StudyPedia{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                {% if post.user.profile_picture %}
+                    <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                {% endif %}
+                <h5><a href="{% url 'accounts:profile' post.user.username %}">@{{ post.user.username }}</a></h5>
+            </div>
+            <p class="mt-2">{{ post.content }}</p>
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="Post Image" class="post-image img-fluid">
+            {% endif %}
+            <p class="text-muted small mt-1">{{ post.created_at|date:"F d, Y H:i" }}</p>
+            <div class="actions d-flex mt-2">
+                {% if post.user == user %}
+                    <a href="{% url 'social:edit_post' post.pk %}" class="btn btn-sm btn-primary mr-2">Edit</a>
+                    <a href="{% url 'social:delete_post' post.pk %}" class="btn btn-sm btn-danger mr-2">Delete</a>
+                {% endif %}
+                <form action="{% url 'social:like_post' post.pk %}" method="post" class="mr-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Like</button>
+                </form>
+                <a href="{% url 'social:social_feed' %}" class="btn btn-sm btn-secondary">Back</a>
+            </div>
+        </div>
+    </div>
+
+    <h4>Comments</h4>
+    {% for comment in comments %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    {% if comment.user.profile_picture %}
+                        <img src="{{ comment.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% endif %}
+                    <p><strong><a href="{% url 'accounts:profile' comment.user.username %}">@{{ comment.user.username }}</a></strong>: {{ comment.content }}</p>
+                </div>
+                <p class="text-muted small">{{ comment.created_at|date:"F d, Y H:i" }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p>No comments yet.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

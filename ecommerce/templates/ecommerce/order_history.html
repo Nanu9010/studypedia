@@ -1,10 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<!-- ecommerce/templates/ecommerce/order_history.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Order History</h1>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="grid grid-3">
+      {% for order in orders %}
+        <div class="card">
+          <h3>Order #{{ order.id }}</h3>
+          <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+          <p><strong>Total Amount:</strong> ${{ order.total_amount }}</p>
+          <p><strong>Created At:</strong> {{ order.created_at }}</p>
+          <p><strong>Items:</strong></p>
+          <ul>
+            {% for item in order.items.all %}
+              <li>{{ item.item.title }} (Quantity: {{ item.quantity }}) <a href="{% url 'ecommerce:download_item' item.item.id %}" class="btn btn-primary">Download</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% empty %}
+        <p>No orders found.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

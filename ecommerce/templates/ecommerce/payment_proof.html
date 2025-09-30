@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Payment Proof - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">Upload Payment Proof</h2>
+            
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                <h4 style="margin-bottom: 0.5rem;">Purchase Details</h4>
+                <p style="margin-bottom: 0.25rem;"><strong>Item:</strong> {{ purchase.item.title }}</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Amount:</strong> ₹{{ purchase.amount_paid }}</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Payment Method:</strong> {{ purchase.get_payment_method_display }}</p>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_payment_reference">Transaction Reference ID</label>
+                    <input type="text" name="payment_reference" id="id_payment_reference" 
+                           placeholder="UPI Transaction ID or Bank Reference Number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_payment_screenshot">Payment Screenshot</label>
+                    <input type="file" name="payment_screenshot" id="id_payment_screenshot" accept="image/*" required>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
+                        Upload a clear screenshot of your payment confirmation
+                    </p>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Proof</button>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: #fffbeb; border-radius: 4px;">
+                <h4 style="margin-bottom: 0.5rem; color: #f59e0b;">Important Instructions</h4>
+                <ul style="font-size: 0.9rem; color: #666;">
+                    <li>Make sure the screenshot clearly shows the transaction details</li>
+                    <li>Include the transaction ID, amount, and date in the screenshot</li>
+                    <li>Your purchase will be activated within 24 hours of verification</li>
+                    <li>For issues, contact support@studenthub.com</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

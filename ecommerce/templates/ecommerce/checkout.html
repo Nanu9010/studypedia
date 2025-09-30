@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Checkout</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="card">
+        <h2>Cart Summary</h2>
+        <ul>
+            {% for item in cart_items %}
+                <li>{{ item.item }} ({{ item.content_type.app_label|title }}) - {{ item.quantity }} x ₹{{ item.item.price }}</li>
+            {% endfor %}
+        </ul>
+        <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+        <p><strong>Total Credits:</strong> {{ total_credits }}</p>
+    </div>
+    <div class="card">
+        <h2>Payment Options</h2>
+        {% if can_pay_with_credits %}
+            <form action="{% url 'ecommerce:checkout' %}" method="post" class="form-group">
+                {% csrf_token %}
+                <input type="hidden" name="payment_method" value="credits">
+                <button type="submit" class="btn btn-primary">Pay with Credits ({{ request.user.credits }} available)</button>
+            </form>
+        {% else %}
+            <p>Insufficient credits ({{ request.user.credits }} available, {{ total_credits }} needed).</p>
+        {% endif %}
+        <button id="razorpay-pay" class="btn btn-primary">Pay with Razorpay</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if razorpay_order_id %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": {{ amount_paise }},
+        "currency": "INR",
+        "name": "StudyPedia",
+        "description": "Purchase of Study Materials",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            fetch('{% url 'ecommerce:payment_callback' %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    'razorpay_payment_id': response.razorpay_payment_id,
+                    'razorpay_order_id': response.razorpay_order_id,
+                    'razorpay_signature': response.razorpay_signature
+                })
+            }).then(response => response.json()).then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Payment verification failed: ' + data.message);
+                }
+            });
+        },
+        "prefill": {
+            "name": "{{ user.username }}",
+            "email": "{{ user.email }}"
+        },
+        "theme": {
+            "color": "#000000"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    document.getElementById('razorpay-pay').onclick = function(e) {
+        rzp1.open();
+        e.preventDefault();
+    };
+</script>
+{% endif %}
+{% endblock %}

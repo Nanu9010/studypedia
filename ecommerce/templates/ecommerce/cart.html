@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h1>Your Cart</h1>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if items %}
+    <div class="grid grid-2">
+      {% for item in items %}
+        <div class="card">
+          <h3>{{ item.item }} ({{ item.content_type.app_label|title }})</h3>
+          <p><strong>Price:</strong> ₹{{ item.item.price }}</p>
+          <p><strong>Credits:</strong> {{ item.item.credit_price }}</p>
+          <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+          <a href="{% url 'ecommerce:remove_from_cart' item.object_id %}?type={{ item.content_type.app_label }}" class="btn btn-secondary">
+            Remove
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="card mt-4">
+      <h3>Total</h3>
+      <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+      <p><strong>Total Credits:</strong> {{ total_credits }}</p>
+
+      {% if can_pay_with_credits %}
+        <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="payment_method" value="credits">
+          <button type="submit" class="btn btn-primary w-100">Pay with Credits</button>
+        </form>
+      {% endif %}
+
+      <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
+        {% csrf_token %}
+        <input type="hidden" name="payment_method" value="razorpay">
+        <button type="submit" class="btn btn-primary w-100">Pay with Razorpay</button>
+      </form>
+
+      <form action="{% url 'accounts:profile' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="payment_method" value="manual">
+        <button type="submit" class="btn btn-secondary w-100"> Profile </button>
+      </form>
+    </div>
+
+    <div class="mt-3">
+      <a href="{% url 'notes:note_list' %}" class="btn btn-outline-secondary w-100 mb-2">
+        <i class="fas fa-arrow-left"></i> Continue Shopping Notes
+      </a>
+      <a href="{% url 'papers:paper_list' %}" class="btn btn-outline-secondary w-100">
+        <i class="fas fa-arrow-left"></i> Continue Shopping Papers
+      </a>
+    </div>
+
+  {% else %}
+    <div class="text-center py-5">
+      <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+      <h3>Your cart is empty</h3>
+      <p class="text-muted">Browse our collection and add items to your cart.</p>
+      <a href="{% url 'notes:note_list' %}" class="btn btn-primary mb-2">
+        <i class="fas fa-search"></i> Browse Notes
+      </a>
+      <a href="{% url 'papers:paper_list' %}" class="btn btn-primary">
+        <i class="fas fa-search"></i> Browse Papers
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

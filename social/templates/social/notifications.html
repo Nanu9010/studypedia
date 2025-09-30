@@ -1,10 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Notifications - StudyPedia{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Notifications</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            {% for notif in notifications %}
+                <div class="message">
+                    {% if notif.type == 'follow' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> followed you.</p>
+                    {% elif notif.type == 'comment' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> commented on your <a href="{% url 'social:post_detail' notif.related_post.pk %}">post</a>.</p>
+                    {% elif notif.type == 'message' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> sent you a <a href="{% url 'social:chat_room' notif.related_message.room.id %}">message</a>.</p>
+                    {% endif %}
+                    <p><small>{{ notif.created_at|date:"F d, Y H:i" }}</small></p>
+                </div>
+            {% empty %}
+                <p>No notifications yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

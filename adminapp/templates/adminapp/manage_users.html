@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <h1 style="margin-bottom: 1.5rem;">User Management</h1>
+    
+    {% if users %}
+        <div class="card">
+            <div style="display: grid; gap: 1rem;">
+                {% for user in users %}
+                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-color); align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;">
+                            {% else %}
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb; 
+                                            display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                    <span>{{ user.username|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div>
+                                <h4 style="margin-bottom: 0.25rem;">{{ user.username }}</h4>
+                                <p style="color: #666; font-size: 0.8rem; margin: 0;">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="color: #666; font-size: 0.9rem;">
+                            <p style="margin: 0;">{{ user.college|default:"No college" }}</p>
+                            <p style="margin: 0;">Joined {{ user.date_joined|date:"M d, Y" }}</p>
+                        </div>
+                        
+                        <div>
+                            <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; 
+                                background: {% if user.is_staff %}#8b5cf620{% else %}#f3f4f6{% endif %}; 
+                                color: {% if user.is_staff %}#8b5cf6{% else %}#666{% endif %}; 
+                                font-size: 0.8rem;">
+                                {% if user.is_staff %}Staff{% else %}Student{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <a href="{% url 'admin:auth_user_change' user.id %}" class="btn btn-secondary" style="font-size: 0.8rem;">Edit</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <h3 style="margin-bottom: 1rem; color: #666;">No users found</h3>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

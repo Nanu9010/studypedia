@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}About - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="margin-bottom: 1.5rem;">About StudentHub</h1>
+        
+        <div style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem;">Our Mission</h2>
+            <p style="line-height: 1.8;">
+                StudentHub is dedicated to creating a comprehensive educational ecosystem where students can 
+                access high-quality study materials, connect with peers, and enhance their learning experience 
+                through collaboration and resource sharing.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem;">What We Offer</h2>
+            <div class="grid grid-2" style="gap: 1.5rem;">
+                <div class="card">
+                    <h3 style="margin-bottom: 0.5rem;">Study Materials</h3>
+                    <p>Access notes, solved papers, assignments, and practical files for various subjects and universities.</p>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 0.5rem;">Learning Roadmaps</h3>
+                    <p>Follow structured learning paths for different subjects and career goals.</p>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 0.5rem;">Community</h3>
+                    <p>Connect with other students, share experiences, and ask questions.</p>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 0.5rem;">Video Collaboration</h3>
+                    <p>Study together with peers through our integrated video calling feature.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1rem;">For Content Creators</h2>
+            <p style="line-height: 1.8;">
+                StudentHub provides a platform for students and educators to share their knowledge and earn 
+                recognition or compensation for their contributions. Upload your study materials and help others 
+                while building your academic portfolio.
+            </p>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <h2 style="margin-bottom: 1rem;">Get In Touch</h2>
+            <p style="line-height: 1.8;">
+                Have questions or suggestions? We'd love to hear from you. Reach out to us at 
+                <strong>support@studenthub.com</strong> or connect with us on our social media channels.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}StudyPedia Marketplace - Study Materials{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Hero Section (Marketplace Welcome) -->
+    <section class="hero">
+        <h1>StudyPedia Marketplace</h1>
+        <p>Discover high-quality study notes, solved papers, and learning resources for your academic success.</p>
+        <div class="hero-buttons">
+            <a href="#featured" class="btn btn-primary">Browse All</a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-secondary">Join Now</a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat-item">
+            <h2>{{ stats.total_notes }}</h2>
+            <p>Study Notes</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_papers }}</h2>
+            <p>Solved Papers</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_universities }}</h2>
+            <p>Universities</p>
+        </div>
+        <div class="stat-item">
+            <h2>{{ stats.total_downloads }}</h2>
+            <p>Downloads</p>
+        </div>
+    </section>
+
+    <!-- Featured Content Section -->
+    <section class="featured" id="featured">
+        <h2>Featured Study Materials</h2>
+        <div class="resource-grid grid-3">
+            {% for note in featured_notes %}
+                <div class="resource-card">
+                    {% if note.image %}
+                        <img src="{{ note.image.url }}" alt="{{ note.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover; margin-bottom: 1rem;">
+                    {% else %}
+                        <div style="aspect-ratio: 1/1; background: var(--hover-color); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; border-radius: 4px;">
+                            <span style="font-size: 2rem;">📚</span>
+                        </div>
+                    {% endif %}
+                    <h3>{{ note.name }}</h3>
+                    <p>{{ note.branch.name }} ({{ note.branch.degree.name }})</p>
+                    <p><strong>Price:</strong> ₹{{ note.price }} | {{ note.credit_price }} Credits</p>
+                    <a href="{% url 'ecommerce:add_to_cart' note.pk %}?type=note" class="btn btn-primary">Add to Cart</a>
+                </div>
+            {% empty %}
+                <p>No featured notes available.</p>
+            {% endfor %}
+
+            {% for paper in featured_papers %}
+                <div class="resource-card">
+                    {% if paper.image %}
+                        <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover; margin-bottom: 1rem;">
+                    {% else %}
+                        <div style="aspect-ratio: 1/1; background: var(--hover-color); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; border-radius: 4px;">
+                            <span style="font-size: 2rem;">📄</span>
+                        </div>
+                    {% endif %}
+                    <h3>{{ paper.name }}</h3>
+                    <p class="text-muted">{{ paper.get_exam_type_display }}</p>
+                    <p>{{ paper.branch.name }} ({{ paper.branch.degree.name }})</p>
+                    <p><strong>Price:</strong> ₹{{ paper.price }} | {{ paper.credit_price }} Credits</p>
+                    <a href="{% url 'ecommerce:add_to_cart' paper.pk %}?type=paper" class="btn btn-primary">Add to Cart</a>
+                </div>
+            {% empty %}
+                <p>No featured papers available.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="featured">
+        <h2>Browse by Category</h2>
+        <div class="resource-grid grid-4">
+            <a href="{% url 'notes:note_list' %}" class="resource-card" style="text-decoration: none; color: inherit;">
+                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">📚</div>
+                <h3 style="text-align: center;">Study Notes</h3>
+                <p style="text-align: center;">Comprehensive notes for all subjects</p>
+            </a>
+            <a href="{% url 'papers:paper_list' %}" class="resource-card" style="text-decoration: none; color: inherit;">
+                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">📄</div>
+                <h3 style="text-align: center;">Question Papers</h3>
+                <p style="text-align: center;">Previous year solved papers</p>
+            </a>
+            <a href="{% url 'roadmaps:roadmap_list' %}" class="resource-card" style="text-decoration: none; color: inherit;">
+                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🗺️</div>
+                <h3 style="text-align: center;">Roadmaps</h3>
+                <p style="text-align: center;">Learning paths and guides</p>
+            </a>
+            <a href="{% url 'roadmaps:syllabus_list' %}" class="resource-card" style="text-decoration: none; color: inherit;">
+                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">📋</div>
+                <h3 style="text-align: center;">Syllabus</h3>
+                <p style="text-align: center;">Complete course syllabi</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+        <h2>Ready to Excel in Your Studies?</h2>
+        <p>Join thousands of students achieving academic success with StudyPedia's premium study materials.</p>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Create Free Account</a>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let page = 2;
+let loading = false;
+let hasMorePages = true;
+
+window.addEventListener('scroll', () => {
+    if (!hasMorePages || loading) return;
+
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+        loading = true;
+        fetch(`?page=${page}`)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContentEl = doc.querySelector('.resource-grid');
+
+                // If no new content, stop further requests
+                if (!newContentEl || !newContentEl.innerHTML.trim()) {
+                    hasMorePages = false;
+                    return;
+                }
+
+                document.querySelector('.resource-grid')
+                    .insertAdjacentHTML('beforeend', newContentEl.innerHTML);
+
+                page++;
+                loading = false;
+            })
+            .catch(() => {
+                loading = false;
+            });
+    }
+});
+</script>
+{% endblock %}

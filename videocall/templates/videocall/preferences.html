@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat Preferences{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:600px;">
+  <h2 class="mb-4">Your Chat Preferences</h2>
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+    <div class="col-12">
+      <label for="age_min" class="form-label">Preferred Age Min</label>
+      <input type="number" id="age_min" name="age_min" class="form-control"
+             value="{{ preferences.preferred_age_min }}" min="18" max="100">
+    </div>
+    <div class="col-12">
+      <label for="age_max" class="form-label">Preferred Age Max</label>
+      <input type="number" id="age_max" name="age_max" class="form-control"
+             value="{{ preferences.preferred_age_max }}" min="18" max="100">
+    </div>
+    <div class="col-12">
+      <label class="form-label">Interests (comma-separated)</label>
+      <input type="text" name="interests" class="form-control"
+             value="{{ preferences.interests|join:',' }}">
+    </div>
+    <div class="col-12 form-check">
+      <input class="form-check-input" type="checkbox" id="location_based" name="location_based"
+             {% if preferences.location_based_matching %}checked{% endif %}>
+      <label class="form-check-label" for="location_based">
+        Match by Location
+      </label>
+    </div>
+    <div class="col-12 form-check">
+      <input class="form-check-input" type="checkbox" id="text_only" name="text_only"
+             {% if preferences.text_chat_only %}checked{% endif %}>
+      <label class="form-check-label" for="text_only">
+        Text Chat Only
+      </label>
+    </div>
+    <div class="col-12 text-center">
+      <button type="submit" class="btn btn-primary">Save Preferences</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

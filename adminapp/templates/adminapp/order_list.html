@@ -1,0 +1,149 @@
+<!-- templates/adminapp/order_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Orders Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <style>
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-failed { background: #fecaca; color: #b91c1c; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+    </style>
+
+    <div class="admin-header">
+        <div>
+            <h1>Orders Management</h1>
+            <p style="color: #666;">Track all customer orders and payments</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get">
+            <div class="grid">
+                <input type="text" name="search" placeholder="Search by user or order ID..." value="{{ request.GET.search }}">
+                <select name="status">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Paid</option>
+                    <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+                <select name="payment_method">
+                    <option value="">All Payment Methods</option>
+                    <option value="razorpay" {% if request.GET.payment_method == 'razorpay' %}selected{% endif %}>Razorpay</option>
+                    <option value="credits" {% if request.GET.payment_method == 'credits' %}selected{% endif %}>Credits</option>
+                    <option value="upi" {% if request.GET.payment_method == 'upi' %}selected{% endif %}>UPI</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">
+                            #{{ order.id|slice:":8" }}
+                        </code>
+                    </td>
+                    <td>
+                        <strong>{{ order.user.username }}</strong><br>
+                        <small style="color: #666;">{{ order.user.email }}</small>
+                    </td>
+                    <td>{{ order.total_items }} item{{ order.total_items|pluralize }}</td>
+                    <td>
+                        {% if order.total_amount > 0 %}
+                            <strong>₹{{ order.total_amount }}</strong>
+                        {% endif %}
+                        {% if order.total_credits > 0 %}
+                            <br><small>{{ order.total_credits }} credits</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.get_payment_method_display }}</td>
+                    <td>
+                        <span class="order-status status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {{ order.created_at|date:"M d, Y" }}<br>
+                        <small style="color: #666;">{{ order.created_at|time:"H:i" }}</small>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-secondary btn-sm" onclick="viewOrderDetails('{{ order.id }}')">View</a>
+                            {% if order.status == 'pending' %}
+                            <a href="#" class="btn btn-success btn-sm" onclick="markAsPaid('{{ order.id }}')">Mark Paid</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #666; padding: 2rem;">No orders found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if orders.has_other_pages %}
+    <div class="pagination">
+        {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}" class="btn btn-secondary btn-sm">Previous</a>
+        {% endif %}
+        <span class="btn btn-primary btn-sm">Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span>
+        {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}" class="btn btn-secondary btn-sm">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function viewOrderDetails(orderId) {
+    // Implement order details modal or redirect
+    alert('Order details for: ' + orderId);
+}
+
+function markAsPaid(orderId) {
+    if (confirm('Mark this order as paid?')) {
+        // Implement AJAX call to update order status
+        fetch(`/admin/orders/${orderId}/mark-paid/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

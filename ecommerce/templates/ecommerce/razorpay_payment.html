@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Razorpay Payment{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:600px;">
+  <h2 class="mb-4">Complete Payment</h2>
+  <p>Order ID: <strong>{{ order.id }}</strong></p>
+  <p>Amount: <strong>₹{{ amount|floatformat:2 }}</strong></p>
+
+  <button id="rzp-button" class="btn btn-success w-100">
+    Pay with Razorpay
+  </button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const options = {
+    "key": "{{ razorpay_key_id }}",
+    "amount": {{ amount_paise }},
+    "currency": "INR",
+    "name": "StudyPediya",
+    "description": "Order {{ order.id }}",
+    "order_id": "{{ razorpay_order_id }}",
+    "handler": function (response){
+        fetch("{% url 'ecommerce:verify_payment' %}", {
+            method: "POST",
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            body: new URLSearchParams({
+                'razorpay_order_id': response.razorpay_order_id,
+                'razorpay_payment_id': response.razorpay_payment_id,
+                'razorpay_signature': response.razorpay_signature
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success'){
+                window.location.href = data.redirect;
+            } else {
+                alert("Payment verification failed: " + data.message);
+            }
+        });
+    },
+    "prefill": {
+        "name": "{{ user.get_full_name }}",
+        "email": "{{ user.email }}"
+    },
+    "theme": {"color": "#3399cc"}
+};
+document.getElementById('rzp-button').onclick = function(e){
+    const rzp = new Razorpay(options);
+    rzp.open();
+    e.preventDefault();
+}
+</script>
+
+{% endblock %}

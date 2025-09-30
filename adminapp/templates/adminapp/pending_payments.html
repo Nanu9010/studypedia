@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Payments - StudentHub{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <h1 style="margin-bottom: 1.5rem;">Pending Payment Verifications</h1>
+    
+    {% if purchases %}
+        <div class="card">
+            <div style="display: grid; gap: 1rem;">
+                {% for purchase in purchases %}
+                    <div style="padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="margin-bottom: 0.5rem;">
+                                    <a href="{% url 'notes:detail' purchase.item.pk %}" style="text-decoration: none; color: inherit;">
+                                        {{ purchase.item.title }}
+                                    </a>
+                                </h3>
+                                <p style="color: #666; margin-bottom: 0.25rem;">
+                                    <strong>User:</strong> {{ purchase.user.username }} ({{ purchase.user.email }})
+                                </p>
+                                <p style="color: #666; margin-bottom: 0.25rem;">
+                                    <strong>Amount:</strong> ₹{{ purchase.amount_paid }} via {{ purchase.get_payment_method_display }}
+                                </p>
+                                <p style="color: #666; margin-bottom: 0.25rem;">
+                                    <strong>Date:</strong> {{ purchase.created_at|date:"M d, Y H:i" }}
+                                </p>
+                                {% if purchase.payment_reference %}
+                                    <p style="color: #666;">
+                                        <strong>Reference:</strong> {{ purchase.payment_reference }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            
+                            <a href="{% url 'adminapp:verify_payment' purchase.pk %}" class="btn btn-primary">Review</a>
+                        </div>
+                        
+                        {% if purchase.payment_screenshot %}
+                            <div style="margin-top: 1rem;">
+                                <h4 style="margin-bottom: 0.5rem;">Payment Proof</h4>
+                                <img src="{{ purchase.payment_screenshot.url }}" alt="Payment proof" 
+                                     style="max-width: 300px; border-radius: 4px;">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <h3 style="margin-bottom: 1rem; color: #666;">No pending payments</h3>
+            <p style="color: #666;">All payments have been processed.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

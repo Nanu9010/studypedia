@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Success{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <h2 class="mb-4 text-success"><i class="fas fa-check-circle"></i> Payment Successful!</h2>
+  <p>Your order <strong>{{ order.id }}</strong> has been completed.</p>
+  <a href="{% url 'ecommerce:my_purchases' %}" class="btn btn-primary mt-3">
+    View Your Purchases
+  </a>
+</div>
+{% endblock %}

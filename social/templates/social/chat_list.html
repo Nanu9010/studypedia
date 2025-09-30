@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Chats - StudyPedia{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Your Chats</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            {% for room in rooms %}
+                <p>
+                    <a href="{% url 'social:chat_room' room.id %}">
+                        Chat with @{{ room.other_user.username }}
+                    </a>
+                </p>
+            {% empty %}
+                <p>No chats yet. Start a conversation from a user's profile!</p>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Video Chat Lobby{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4 text-center">Study Together Lobby</h1>
+  <div class="d-flex justify-content-center mb-4">
+    <button id="btnRandom" class="btn btn-primary me-2">Find Random Chat</button>
+    <a href="{% url 'videocall:preferences' %}" class="btn btn-secondary">Preferences</a>
+  </div>
+
+  <div id="stats" class="row text-center mb-5">
+    <div class="col">
+      <h5>Online Users</h5>
+      <p>{{ stats.online_users }}</p>
+    </div>
+    <div class="col">
+      <h5>Active Chats</h5>
+      <p>{{ stats.active_chats }}</p>
+    </div>
+    <div class="col">
+      <h5>Waiting Users</h5>
+      <p>{{ stats.waiting_users }}</p>
+    </div>
+  </div>
+
+  {% if current_room %}
+  <div class="alert alert-info text-center">
+    You are currently in room <strong>{{ current_room.id }}</strong>.
+    <a href="{% url 'videocall:room' current_room.id %}" class="btn btn-sm btn-success ms-2">Go to Room</a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+document.getElementById('btnRandom').onclick = async () => {
+  const resp = await fetch('{% url "videocall:find_random" %}', {
+    credentials: 'same-origin'
+  });
+  const data = await resp.json();
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  }
+};
+</script>
+{% endblock %}

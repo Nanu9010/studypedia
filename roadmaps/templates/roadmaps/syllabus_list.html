@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Syllabi</h1>
+
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if user.is_staff %}
+      <a href="{% url 'roadmaps:syllabus_create' %}" class="btn btn-primary">Create Syllabus</a>
+    {% endif %}
+
+    <div class="grid grid-3">
+      {% for syllabus in syllabi %}
+        <div class="card">
+          <h3>{{ syllabus.name }}</h3>
+          <p><strong>Code:</strong> {{ syllabus.code }}</p>
+          <p><strong>Active:</strong> {{ syllabus.is_active|yesno:"Yes,No" }}</p>
+
+          {% if syllabus.pdf_file %}
+            <p><strong>File:</strong>
+              <a href="{{ syllabus.pdf_file.url }}" target="_blank">
+                {{ syllabus.pdf_file.name }}
+              </a>
+            </p>
+          {% endif %}
+
+          {% if user.is_staff %}
+            <a href="{% url 'roadmaps:syllabus_update' syllabus.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'roadmaps:syllabus_delete' syllabus.pk %}" class="btn btn-secondary"
+               onclick="return confirm('Are you sure you want to delete {{ syllabus.name }}?');">
+               Delete
+            </a>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>No syllabi found.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

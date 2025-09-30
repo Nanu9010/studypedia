@@ -1,10 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Notifications - StudyPedia{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Notifications</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="">
+        {% csrf_token %}
+        <div class="card mb-4">
+            <div class="card-body">
+                {% for notification in page_obj %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                {% if notification.sender.profile_picture %}
+                                    <img src="{{ notification.sender.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                                <div>
+                                    <p class="mb-0">
+                                        <strong><a href="{% url 'accounts:profile' notification.sender.username %}">@{{ notification.sender.username }}</a></strong>
+                                        {% if notification.type == 'comment' %}
+                                            commented on your post.
+                                        {% elif notification.type == 'follow' %}
+                                            followed you.
+                                        {% elif notification.type == 'message' %}
+                                            sent you a message.
+                                        {% elif notification.type == 'like' %}
+                                            liked your post.
+                                        {% endif %}
+                                    </p>
+                                    {% if notification.related_post %}
+                                        <a href="{% url 'social:post_detail' notification.related_post.pk %}">View Post</a>
+                                    {% elif notification.related_message %}
+                                        <a href="{% url 'messenger:chat_room' notification.related_message.room.id %}">View Chat</a>
+                                    {% endif %}
+                                    <p class="text-muted small">{{ notification.created_at|date:"F d, Y H:i" }}</p>
+                                </div>
+                                <input type="checkbox" name="notification_ids" value="{{ notification.id }}" class="ml-auto" {% if notification.is_read %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center">No notifications yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% if page_obj.has_next %}
+            <div class="text-center mb-4">
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-light">Load More</a>
+            </div>
+        {% endif %}
+        {% if not page_obj.object_list|all_is_read %}
+            <button type="submit" class="btn btn-primary w-100">Mark as Read</button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const userId = {{ user.id }};
+    const notifSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
+    const notifList = document.querySelector('.card-body');
+
+    notifSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'new_notification' && !data.is_read) {
+            const notifDiv = document.createElement('div');
+            notifDiv.className = 'card mb-2';
+            notifDiv.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <img src="/static/img/default_profile.png" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                            <p class="mb-0"><strong>@${data.sender}</strong> ${data.type === 'comment' ? 'commented on your post' : data.type === 'follow' ? 'followed you' : 'sent you a message'}.</p>
+                            <p class="text-muted small">${new Date(data.created_at).toLocaleString()}</p>
+                        </div>
+                        <input type="checkbox" name="notification_ids" value="${data.id}" class="ml-auto">
+                    </div>
+                </div>
+            `;
+            notifList.prepend(notifDiv);
+        }
+    };
+
+    document.querySelector('form').addEventListener('submit', (e) => {
+        const formData = new FormData(e.target);
+        const notificationIds = formData.getAll('notification_ids');
+        notificationIds.forEach(id => {
+            notifSocket.send(JSON.stringify({'type': 'mark_read', 'notification_id': id}));
+        });
+    });
+</script>
+{% endblock %}
