@@ -1,57 +1,51 @@
 {% extends 'base.html' %}
-
-{% block title %}Admin Dashboard{% endblock %}
-<!-- adminapp/templates/adminapp/dashboard.html -->
-
+{% block title %}Admin Dashboard - StudyPedia{% endblock %}
 {% block content %}
-  <div class="container">
+<div class="container">
     <h1>Admin Dashboard</h1>
     {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      </div>
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
     {% endif %}
     <div class="grid grid-3">
-      <div class="card">
-
-      <div class="card">
-        <h3>Universities</h3>
-        <p><strong>Count:</strong> {{ universities_count }}</p>
-        <a href="{% url 'university:university_list' %}" class="btn btn-primary">Manage Universities</a>
-      </div>
-      <div class="card">
-        <h3>Degrees</h3>
-        <p><strong>Count:</strong> {{ degrees_count }}</p>
-        <a href="{% url 'university:degree_list' %}" class="btn btn-primary">Manage Degrees</a>
-      </div>
-      <div class="card">
-        <h3>Branches</h3>
-        <p><strong>Count:</strong> {{ branches_count }}</p>
-        <a href="{% url 'university:branch_list' %}" class="btn btn-primary">Manage Branches</a>
-      </div>
-
-      <div class="card">
-        <h3>Papers</h3>
-        <p><strong>Count:</strong> {{ papers_count }}</p>
-        <a href="{% url 'papers:paper_list' %}" class="btn btn-primary">Manage Papers</a>
-      </div>
-      <div class="card">
-        <h3>Notes</h3>
-        <p><strong>Count:</strong> {{ notes_count }}</p>
-        <a href="{% url 'notes:note_list' %}" class="btn btn-primary">Manage Notes</a>
-      </div>
-      <div class="card">
-        <h3>Roadmaps</h3>
-        <p><strong>Count:</strong> {{ roadmaps_count }}</p>
-        <a href="{% url 'roadmaps:roadmap_list' %}" class="btn btn-primary">Manage Roadmaps</a>
-      </div>
-      <div class="card">
-        <h3>Syllabi</h3>
-        <p><strong>Count:</strong> {{ syllabi_count }}</p>
-        <a href="{% url 'roadmaps:syllabus_list' %}" class="btn btn-primary">Manage Syllabi</a>
-      </div>
+        <div class="card">
+            <h3>Universities</h3>
+            <p><strong>Count:</strong> {{ universities_count }}</p>
+            <a href="{% url 'university:university_list' %}" class="btn btn-primary">Manage Universities</a>
+        </div>
+        <div class="card">
+            <h3>Degrees</h3>
+            <p><strong>Count:</strong> {{ degrees_count }}</p>
+            <a href="{% url 'university:degree_list' %}" class="btn btn-primary">Manage Degrees</a>
+        </div>
+        <div class="card">
+            <h3>Branches</h3>
+            <p><strong>Count:</strong> {{ branches_count }}</p>
+            <a href="{% url 'university:branch_list' %}" class="btn btn-primary">Manage Branches</a>
+        </div>
+        <div class="card">
+            <h3>Papers</h3>
+            <p><strong>Count:</strong> {{ papers_count }}</p>
+            <a href="{% url 'papers:paper_list' %}" class="btn btn-primary">Manage Papers</a>
+        </div>
+        <div class="card">
+            <h3>Notes</h3>
+            <p><strong>Count:</strong> {{ notes_count }}</p>
+            <a href="{% url 'notes:note_list' %}" class="btn btn-primary">Manage Notes</a>
+        </div>
+        <div class="card">
+            <h3>Roadmaps</h3>
+            <p><strong>Count:</strong> {{ roadmaps_count }}</p>
+            <a href="{% url 'roadmaps:roadmap_list' %}" class="btn btn-primary">Manage Roadmaps</a>
+        </div>
+        <div class="card">
+            <h3>Syllabi</h3>
+            <p><strong>Count:</strong> {{ syllabi_count }}</p>
+            <a href="{% url 'roadmaps:syllabus_list' %}" class="btn btn-primary">Manage Syllabi</a>
+        </div>
     </div>
 
     <!-- Quick Actions -->
@@ -62,7 +56,6 @@
             <a href="{% url 'notes:note_create' %}" class="btn btn-primary">Add Note</a>
             <a href="{% url 'roadmaps:syllabus_create' %}" class="btn btn-success">Add Syllabus</a>
             <a href="{% url 'university:university_create' %}" class="btn btn-info">Add University</a>
-
         </div>
     </div>
 
@@ -108,33 +101,89 @@
 
     <!-- Users Overview -->
     <div class="user-list">
-        <h2>👥 Users Overview</h2>
-        <table>
+        <h2>👥 Recent Users</h2>
+        <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Papers Bought</th>
-                    <th>Notes Bought</th>
+                    <th>Username</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                    <th>Orders</th>
                     <th>Total Spent</th>
+                    <th>Staff</th>
+                    <th>Active</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for u in users_stats %}
-                <tr>
-                    <td>{{ u.user.username }}</td>
-                    <td>{{ u.user.email }}</td>
-                    <td>{{ u.papers_bought }}</td>
-                    <td>{{ u.notes_bought }}</td>
-                    <td>₹{{ u.total_spent }}</td>
-                </tr>
+                {% for user in recent_users %}
+                    <tr>
+                        <td>@{{ user.username }}</td>
+                        <td>{{ user.created_at|date:"F d, Y" }}</td>
+                        <td>{{ user.last_login|date:"F d, Y H:i" }}</td>
+                        <td>
+                            <ul>
+                                {% for order in user.orders %}
+                                    <li>Order #{{ order.id }} - ₹{{ order.total_amount }} - {{ order.status }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>₹{{ user.total_spent }}</td>
+                        <td>{{ user.is_staff|yesno:"Yes,No" }}</td>
+                        <td>{{ user.is_active|yesno:"Yes,No" }}</td>
+                        <td>
+                            {% if request.user.is_superuser %}
+                                <a href="{% url 'adminapp:toggle_staff' user.id %}" class="btn btn-sm btn-primary">Toggle Staff</a>
+                                <a href="{% url 'adminapp:toggle_active' user.id %}" class="btn btn-sm btn-danger">Toggle Active</a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% empty %}
-                <tr><td colspan="5">No users found.</td></tr>
+                    <tr><td colspan="8">No recent users.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Coupons Section -->
+    <div class="coupon-section mt-4">
+        <h2>🎟️ Manage Coupons</h2>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h3>Add New Coupon</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ coupon_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Create Coupon</button>
+                </form>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Valid From</th>
+                    <th>Valid To</th>
+                    <th>Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coupon in coupons %}
+                    <tr>
+                        <td>{{ coupon.code }}</td>
+                        <td>{{ coupon.discount_type|title }}</td>
+                        <td>{{ coupon.discount_value }} {% if coupon.discount_type == 'percentage' %}%{% endif %}</td>
+                        <td>{{ coupon.valid_from|date:"F d, Y H:i" }}</td>
+                        <td>{{ coupon.valid_to|date:"F d, Y H:i" }}</td>
+                        <td>{{ coupon.is_active|yesno:"Yes,No" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">No coupons yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 {% endblock %}
-
-

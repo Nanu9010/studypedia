@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="container">
   <h1>Your Cart</h1>
@@ -31,6 +30,15 @@
       <h3>Total</h3>
       <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
       <p><strong>Total Credits:</strong> {{ total_credits }}</p>
+
+      <!-- Coupon Form -->
+      <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-3">
+        {% csrf_token %}
+        <div class="input-group">
+          <input type="text" name="coupon_code" class="form-control" placeholder="Enter coupon code">
+          <button class="btn btn-outline-secondary" type="submit">Apply Coupon</button>
+        </div>
+      </form>
 
       {% if can_pay_with_credits %}
         <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
@@ -77,3 +85,6 @@
   {% endif %}
 </div>
 {% endblock %}
+
+
+this is admin dashboard , make it more useful for me  | also make a section for cart in ecommerce  and give me all code

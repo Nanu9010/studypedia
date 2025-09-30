@@ -84,9 +84,7 @@ def search_view(request):
     if university:
         notes = notes.filter(subject__branch__degree__university__id=university)
         papers = papers.filter(subject__branch__degree__university__id=university)
-    if subject:
-        notes = notes.filter(subject__id=subject)
-        papers = papers.filter(subject__id=subject)
+
     if year:
         notes = notes.filter(year=year)
         papers = papers.filter(year=year)
@@ -118,7 +116,7 @@ def search_view(request):
         'universities': University.objects.all(),
         'query': query,
         'university': university,
-        'subject': subject,
+
         'year': year,
         'price_min': price_min,
         'price_max': price_max,

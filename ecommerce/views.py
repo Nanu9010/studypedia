@@ -14,6 +14,7 @@ from notes.models import Note
 from papers.models import Paper
 import razorpay
 from django.urls import reverse
+from .models import Coupon
 
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
@@ -98,17 +99,58 @@ def cart_view(request):
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,
     }
     return render(request, 'ecommerce/cart.html', context)
-
 @jwt_auth
 def checkout(request):
     cart = _get_or_create_cart(request.user)
     cart_items = cart.items.select_related('content_type').all()
+
     if not cart_items.exists():
         messages.error(request, "Your cart is empty.")
         return redirect('ecommerce:cart_view')
 
+    coupon = None
+    discount = 0
+
+    # ✅ Handle coupon FIRST (before payment selection)
+    if request.method == 'POST' and 'coupon_code' in request.POST:
+        code = request.POST.get('coupon_code')
+        coupon = Coupon.objects.filter(
+            code=code,
+            is_active=True,
+            valid_from__lte=timezone.now(),
+            valid_to__gte=timezone.now()
+        ).first()
+
+        if coupon:
+            if coupon.discount_type == 'percentage':
+                discount = cart.total_amount * (coupon.discount_value / 100)
+            else:
+                discount = coupon.discount_value
+
+            cart.total_amount -= discount
+            cart.save()
+            messages.success(request, 'Coupon applied!')
+        else:
+            messages.error(request, 'Invalid coupon.')
+
+        context = {
+            'cart': cart,
+            'cart_items': cart_items,
+            'total_amount': cart.total_amount,
+            'total_credits': cart.total_credits,
+            'can_pay_with_credits': (
+                cart.total_credits > 0 and request.user.credits >= cart.total_credits
+            ),
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'coupon': coupon,
+            'discount': discount,
+        }
+        return render(request, 'ecommerce/checkout.html', context)
+
+    # ✅ Handle payment logic
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
+
         with transaction.atomic():
             order = Order.objects.create(
                 user=request.user,
@@ -117,6 +159,7 @@ def checkout(request):
                 total_credits=cart.total_credits,
                 status='processing' if payment_method == 'razorpay' else 'pending'
             )
+
             for ci in cart_items:
                 OrderItem.objects.create(
                     order=order,
@@ -126,6 +169,7 @@ def checkout(request):
                     price_at_purchase=ci.item.price,
                     credits_at_purchase=ci.item.credit_price,
                 )
+
                 PurchaseRequest.objects.get_or_create(
                     user=request.user,
                     content_type=ci.content_type,
@@ -137,29 +181,39 @@ def checkout(request):
                         'status': 'pending'
                     }
                 )
+
+            # ✅ Payment with credits
             if payment_method == 'credits':
                 if cart.total_credits <= 0:
                     messages.error(request, "This cart cannot be paid with credits.")
                     return redirect('ecommerce:checkout')
+
                 if request.user.credits < cart.total_credits:
                     messages.error(
                         request,
                         f"Insufficient credits. Needed: {cart.total_credits}, You have: {request.user.credits}"
                     )
                     return redirect('ecommerce:checkout')
+
                 request.user.credits -= cart.total_credits
                 request.user.save()
+
                 order.status = 'paid'
                 order.paid_at = timezone.now()
                 order.save()
+
                 PurchaseRequest.objects.filter(order=order).update(status='paid')
                 cart.items.all().delete()
+
                 messages.success(request, "Payment successful! Your downloads are ready.")
                 return redirect('accounts:profile')
+
+            # ✅ Razorpay payment
             elif payment_method == 'razorpay':
                 if cart.total_amount <= 0:
                     messages.error(request, "No payable amount found for Razorpay.")
                     return redirect('ecommerce:cart_view')
+
                 try:
                     rp_order = razorpay_client.order.create({
                         'amount': int(cart.total_amount * 100),
@@ -170,9 +224,11 @@ def checkout(request):
                 except Exception as e:
                     messages.error(request, f"Failed to create Razorpay order: {e}")
                     return redirect('ecommerce:cart_view')
+
                 order.razorpay_order_id = rp_order['id']
                 order.status = 'processing'
                 order.save()
+
                 context = {
                     'cart': cart,
                     'cart_items': cart_items,
@@ -183,6 +239,8 @@ def checkout(request):
                     'user': request.user,
                 }
                 return render(request, 'ecommerce/checkout.html', context)
+
+    # ✅ GET request or initial load
     context = {
         'cart': cart,
         'cart_items': cart_items,
@@ -192,8 +250,11 @@ def checkout(request):
             cart.total_credits > 0 and request.user.credits >= cart.total_credits
         ),
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'coupon': coupon,
+        'discount': discount,
     }
     return render(request, 'ecommerce/checkout.html', context)
+
 
 @jwt_auth
 @require_POST
