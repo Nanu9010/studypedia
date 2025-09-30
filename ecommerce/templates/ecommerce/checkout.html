@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
-
-{% block title %}Checkout - StudyPedia{% endblock %}
-
 {% block content %}
 <div class="container">
     <h1>Checkout</h1>
+
     {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -12,76 +10,87 @@
             {% endfor %}
         </div>
     {% endif %}
+
     <div class="card">
-        <h2>Cart Summary</h2>
-        <ul>
-            {% for item in cart_items %}
-                <li>{{ item.item }} ({{ item.content_type.app_label|title }}) - {{ item.quantity }} x ₹{{ item.item.price }}</li>
-            {% endfor %}
-        </ul>
-        <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+        <h3>Order Summary</h3>
+        <p><strong>Subtotal:</strong> ₹{{ total_amount }}</p>
+        {% if discount > 0 %}
+            <p><strong>Discount ({{ coupon.code }}):</strong> -₹{{ discount }}</p>
+        {% endif %}
+        <p><strong>Shipping:</strong> ₹0.00</p>
+        <p><strong>Total:</strong> ₹{{ final_amount }}</p>
         <p><strong>Total Credits:</strong> {{ total_credits }}</p>
-    </div>
-    <div class="card">
-        <h2>Payment Options</h2>
+
+        <form method="post" action="{% url 'ecommerce:checkout' %}">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" name="coupon_code" class="form-control" placeholder="Enter coupon code" {% if coupon %}value="{{ coupon.code }}" readonly{% endif %}>
+                <button type="submit" class="btn btn-outline-secondary">Apply Coupon</button>
+                {% if coupon %}
+                    <a href="{% url 'ecommerce:checkout' %}" class="btn btn-outline-danger">Remove Coupon</a>
+                {% endif %}
+            </div>
+        </form>
+
         {% if can_pay_with_credits %}
-            <form action="{% url 'ecommerce:checkout' %}" method="post" class="form-group">
+            <form method="post" action="">
                 {% csrf_token %}
                 <input type="hidden" name="payment_method" value="credits">
-                <button type="submit" class="btn btn-primary">Pay with Credits ({{ request.user.credits }} available)</button>
+                <button type="submit" class="btn btn-primary w-100">Pay with Credits ({{ user.credits }} available)</button>
             </form>
-        {% else %}
-            <p>Insufficient credits ({{ request.user.credits }} available, {{ total_credits }} needed).</p>
         {% endif %}
-        <button id="razorpay-pay" class="btn btn-primary">Pay with Razorpay</button>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="razorpay">
+            <button type="submit" class="btn btn-primary w-100">Pay with Razorpay</button>
+        </form>
+
+        {% if razorpay_order_id %}
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+            <script>
+                var options = {
+                    "key": "{{ razorpay_key_id }}",
+                    "amount": "{{ amount_paise }}",
+                    "currency": "INR",
+                    "name": "StudyPedia",
+                    "description": "Order #{{ order.id }}",
+                    "order_id": "{{ razorpay_order_id }}",
+                    "handler": function (response) {
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = "{% url 'ecommerce:payment_callback' %}";
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'razorpay_payment_id';
+                        input.value = response.razorpay_payment_id;
+                        form.appendChild(input);
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'razorpay_order_id';
+                        input.value = response.razorpay_order_id;
+                        form.appendChild(input);
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'razorpay_signature';
+                        input.value = response.razorpay_signature;
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+                    },
+                    "prefill": {
+                        "name": "{{ user.username }}",
+                        "email": "{{ user.email }}",
+                        "contact": "{{ user.phone }}"
+                    },
+                    "theme": {
+                        "color": "#3399cc"
+                    }
+                };
+                var rzp = new Razorpay(options);
+                rzp.open();
+            </script>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-{% if razorpay_order_id %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    var options = {
-        "key": "{{ razorpay_key_id }}",
-        "amount": {{ amount_paise }},
-        "currency": "INR",
-        "name": "StudyPedia",
-        "description": "Purchase of Study Materials",
-        "order_id": "{{ razorpay_order_id }}",
-        "handler": function (response) {
-            fetch('{% url 'ecommerce:payment_callback' %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: new URLSearchParams({
-                    'razorpay_payment_id': response.razorpay_payment_id,
-                    'razorpay_order_id': response.razorpay_order_id,
-                    'razorpay_signature': response.razorpay_signature
-                })
-            }).then(response => response.json()).then(data => {
-                if (data.status === 'success') {
-                    window.location.href = data.redirect;
-                } else {
-                    alert('Payment verification failed: ' + data.message);
-                }
-            });
-        },
-        "prefill": {
-            "name": "{{ user.username }}",
-            "email": "{{ user.email }}"
-        },
-        "theme": {
-            "color": "#000000"
-        }
-    };
-    var rzp1 = new Razorpay(options);
-    document.getElementById('razorpay-pay').onclick = function(e) {
-        rzp1.open();
-        e.preventDefault();
-    };
-</script>
-{% endif %}
 {% endblock %}

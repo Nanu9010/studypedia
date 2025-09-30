@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'rest_framework_simplejwt',
-
+    'widget_tweaks',
 
     'core',
     'accounts',
@@ -195,7 +195,7 @@ SIMPLE_JWT = {
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
-USE_TZ = True
+USE_TZ = False
 USE_L10N = True
 
 

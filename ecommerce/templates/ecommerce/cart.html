@@ -1,90 +1,111 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-  <h1>Your Cart</h1>
+    <h1>Your Cart</h1>
 
-  {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  {% if items %}
-    <div class="grid grid-2">
-      {% for item in items %}
-        <div class="card">
-          <h3>{{ item.item }} ({{ item.content_type.app_label|title }})</h3>
-          <p><strong>Price:</strong> ₹{{ item.item.price }}</p>
-          <p><strong>Credits:</strong> {{ item.item.credit_price }}</p>
-          <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-          <a href="{% url 'ecommerce:remove_from_cart' item.object_id %}?type={{ item.content_type.app_label }}" class="btn btn-secondary">
-            Remove
-          </a>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
         </div>
-      {% endfor %}
-    </div>
+    {% endif %}
 
-    <div class="card mt-4">
-      <h3>Total</h3>
-      <p><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
-      <p><strong>Total Credits:</strong> {{ total_credits }}</p>
-
-      <!-- Coupon Form -->
-      <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-3">
-        {% csrf_token %}
-        <div class="input-group">
-          <input type="text" name="coupon_code" class="form-control" placeholder="Enter coupon code">
-          <button class="btn btn-outline-secondary" type="submit">Apply Coupon</button>
+    {% if items %}
+        <div class="grid grid-2">
+            {% for item in items %}
+                {% if item.content_type.model == 'note' %}
+                    {% with note=item.item %}
+                        <div class="card">
+                            <img src="{{ note.image.url|default:'/static/img/default_resource.png' }}" alt="{{ note.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover;">
+                            <h3>{{ note.name }}</h3>
+                            <p>{{ note.branch.name }} ({{ note.branch.degree.name }})</p>
+                            <p><strong>Price:</strong> ₹{{ note.price }}</p>
+                            <p><strong>Credits:</strong> {{ note.credit_price }}</p>
+                            <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                            <a href="{% url 'ecommerce:remove_from_cart' item.object_id %}?type=note" class="btn btn-secondary">Remove</a>
+                        </div>
+                    {% endwith %}
+                {% elif item.content_type.model == 'paper' %}
+                    {% with paper=item.item %}
+                        <div class="card">
+                            <img src="{{ paper.image.url|default:'/static/img/default_resource.png' }}" alt="{{ paper.name }}" class="post-image" style="aspect-ratio: 1/1; object-fit: cover;">
+                            <h3>{{ paper.name }} - {{ paper.get_exam_type_display }}</h3>
+                            <p>{{ paper.branch.name }} ({{ paper.branch.degree.name }})</p>
+                            <p><strong>Price:</strong> ₹{{ paper.price }}</p>
+                            <p><strong>Credits:</strong> {{ paper.credit_price }}</p>
+                            <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                            <a href="{% url 'ecommerce:remove_from_cart' item.object_id %}?type=paper" class="btn btn-secondary">Remove</a>
+                        </div>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
         </div>
-      </form>
 
-      {% if can_pay_with_credits %}
-        <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
-          {% csrf_token %}
-          <input type="hidden" name="payment_method" value="credits">
-          <button type="submit" class="btn btn-primary w-100">Pay with Credits</button>
-        </form>
-      {% endif %}
+        <div class="card mt-4">
+            <h3>Order Summary</h3>
+            <p><strong>Subtotal:</strong> ₹{{ total_amount }}</p>
+            {% if discount > 0 %}
+                <p><strong>Discount ({{ coupon.code }}):</strong> -₹{{ discount }}</p>
+            {% endif %}
+            <p><strong>Shipping:</strong> ₹0.00</p> <!-- Add logic if needed -->
+            <p><strong>Total:</strong> ₹{{ final_amount }}</p>
+            <p><strong>Total Credits:</strong> {{ total_credits }}</p>
 
-      <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
-        {% csrf_token %}
-        <input type="hidden" name="payment_method" value="razorpay">
-        <button type="submit" class="btn btn-primary w-100">Pay with Razorpay</button>
-      </form>
+            <!-- Coupon Form -->
+            <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-3">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="coupon_code" class="form-control" placeholder="Enter coupon code" {% if coupon %}value="{{ coupon.code }}" readonly{% endif %}>
+                    <button type="submit" class="btn btn-outline-secondary">Apply Coupon</button>
+                    {% if coupon %}
+                        <a href="{% url 'ecommerce:checkout' %}" class="btn btn-outline-danger">Remove Coupon</a>
+                    {% endif %}
+                </div>
+            </form>
 
-      <form action="{% url 'accounts:profile' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="payment_method" value="manual">
-        <button type="submit" class="btn btn-secondary w-100"> Profile </button>
-      </form>
-    </div>
+            {% if can_pay_with_credits %}
+                <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="payment_method" value="credits">
+                    <button type="submit" class="btn btn-primary w-100">Pay with Credits ({{ request.user.credits }} available)</button>
+                </form>
+            {% endif %}
 
-    <div class="mt-3">
-      <a href="{% url 'notes:note_list' %}" class="btn btn-outline-secondary w-100 mb-2">
-        <i class="fas fa-arrow-left"></i> Continue Shopping Notes
-      </a>
-      <a href="{% url 'papers:paper_list' %}" class="btn btn-outline-secondary w-100">
-        <i class="fas fa-arrow-left"></i> Continue Shopping Papers
-      </a>
-    </div>
+            <form action="{% url 'ecommerce:checkout' %}" method="post" class="mb-2">
+                {% csrf_token %}
+                <input type="hidden" name="payment_method" value="razorpay">
+                <button type="submit" class="btn btn-primary w-100">Pay with Razorpay</button>
+            </form>
 
-  {% else %}
-    <div class="text-center py-5">
-      <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
-      <h3>Your cart is empty</h3>
-      <p class="text-muted">Browse our collection and add items to your cart.</p>
-      <a href="{% url 'notes:note_list' %}" class="btn btn-primary mb-2">
-        <i class="fas fa-search"></i> Browse Notes
-      </a>
-      <a href="{% url 'papers:paper_list' %}" class="btn btn-primary">
-        <i class="fas fa-search"></i> Browse Papers
-      </a>
-    </div>
-  {% endif %}
+            <form action="{% url 'accounts:profile' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="payment_method" value="manual">
+                <button type="submit" class="btn btn-secondary w-100">View Profile</button>
+            </form>
+        </div>
+
+        <div class="mt-3">
+            <a href="{% url 'notes:note_list' %}" class="btn btn-outline-secondary w-100 mb-2">
+                <i class="fas fa-arrow-left"></i> Continue Shopping Notes
+            </a>
+            <a href="{% url 'papers:paper_list' %}" class="btn btn-outline-secondary w-100">
+                <i class="fas fa-arrow-left"></i> Continue Shopping Papers
+            </a>
+        </div>
+
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h3>Your cart is empty</h3>
+            <p class="text-muted">Browse our collection and add items to your cart.</p>
+            <a href="{% url 'notes:note_list' %}" class="btn btn-primary mb-2">
+                <i class="fas fa-search"></i> Browse Notes
+            </a>
+            <a href="{% url 'papers:paper_list' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Browse Papers
+            </a>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
-
-
-this is admin dashboard , make it more useful for me  | also make a section for cart in ecommerce  and give me all code
