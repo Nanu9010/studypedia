@@ -239,6 +239,13 @@ def checkout(request):
     }
     return render(request, 'ecommerce/checkout.html', context)
 
+@jwt_auth
+def remove_coupon(request):
+    if 'coupon_code' in request.session:
+        del request.session['coupon_code']
+        messages.success(request, 'Coupon removed successfully.')
+    return redirect(request.META.get('HTTP_REFERER', 'ecommerce:cart_view'))
+
 # ... (keep other views as is)
 @jwt_auth
 @require_POST

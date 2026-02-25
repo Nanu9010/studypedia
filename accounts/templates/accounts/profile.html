@@ -43,7 +43,7 @@
                     <a href="{% url 'accounts:edit_profile' %}" class="flex w-full cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-12 px-6 text-sm font-bold uppercase tracking-widest">
                         Edit Profile
                     </a>
-                    <a href="#" class="flex w-full cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-sm font-bold uppercase tracking-widest">
+                    <a href="javascript:void(0)" onclick="navigator.clipboard.writeText(window.location.href); alert('Profile link copied to clipboard!');" class="flex w-full cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-sm font-bold uppercase tracking-widest">
                         Share Profile
                     </a>
                 {% else %}

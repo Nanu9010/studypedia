@@ -1,170 +1,247 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}Chat - StudyPedia Messenger{% endblock %}
+
 {% block content %}
-<main class="flex-1 flex max-w-[1440px] mx-auto w-full bg-white h-full overflow-hidden">
-<aside class="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col border-r border-black h-full bg-white">
-<div class="p-6 border-b border-black">
-<div class="flex items-center justify-between mb-6">
-<h1 class="text-2xl font-light text-black tracking-tight font-display">Inbox</h1>
-<button class="size-8 flex items-center justify-center border border-black text-black hover:bg-black hover:text-white transition-colors">
-<span class="material-symbols-outlined text-sm">edit_square</span>
-</button>
-</div>
-<label class="relative flex items-center group">
-<div class="absolute left-0 text-black">
-<span class="material-symbols-outlined text-[18px]">search</span>
-</div>
-<input class="w-full h-8 bg-transparent border-b border-gray-300 text-black placeholder:text-gray-400 pl-7 pr-4 focus:outline-none focus:border-black transition-colors text-xs font-mono uppercase tracking-wide" placeholder="Search messages..." type="text"/>
-</label>
-</div>
-<div class="flex-1 overflow-y-auto scrollbar-hide">
-<div class="group flex items-center gap-4 p-4 cursor-pointer bg-gray-50 border-b border-gray-100">
-<div class="relative size-12 flex-shrink-0">
-<img alt="User Avatar" class="w-full h-full object-cover rounded-none grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClh3VtLbf-XTYGbNg3i_uIYCPGKFYQmKp2iTUyt1XuLMNHCeQOc9LxtxZAqNnWNLd8s35zMIL8lHSfQbOUGfpPxhuiQ3Qu13LDo6LWLkN187lIcSc8MY4ra58xXVDTWVp_2T0F456vbz3Q5a-HoVSWvNm5iVNdKsSCVLhP2sj-OteT3pLvu2kq4huqaeNiwJWC3MbfghEpkBu86TsZu0F2AfQNYn_YWpEP7snFNdouBKhUORZ1YPeYKeOZrHaiRFeIk2f4bauPd4kY"/>
-<div class="absolute bottom-0 right-0 size-2.5 bg-black border-2 border-white"></div>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-baseline mb-1">
-<h3 class="text-sm font-bold text-black uppercase tracking-wide truncate">Sarah Jenkins</h3>
-<span class="text-[10px] font-mono text-gray-500">10:42 AM</span>
-</div>
-<p class="text-xs text-black font-medium truncate">Can you send me the lecture notes?</p>
-</div>
-</div>
-<div class="group flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 transition-colors">
-<div class="relative size-12 flex-shrink-0">
-<img alt="User Avatar" class="w-full h-full object-cover rounded-none grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjkLrOJS1yJ7gjqnSNGQF_KzdkVP5ijrrhXlOzzhc2QZwmcrOzhSJa6YA6X2i0zxALXtfzP5-BQwJDUu_f5Kvd1OTVCRSYj8I-1JCkR6X6N7Uj_I_ixs2htjoPOGydrsuq-Bhwg_0PVGwDF36h8W5XvoZYp1Dzn_kDTRSKh7wAhVpR6il1MNk7GSAly6aQx2f55-RiJgwLice42mRdPOXZhimKKY3d-d6QgWUG7kZNosDFjfhcDgphsFFJyh84_tmf-hlZqm_1l51i"/>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-baseline mb-1">
-<h3 class="text-sm font-medium text-black uppercase tracking-wide truncate">Study Group: CS101</h3>
-<span class="text-[10px] font-mono text-gray-400">Yesterday</span>
-</div>
-<p class="text-xs text-gray-500 truncate">Alex: I think the exam is on Tuesday.</p>
-</div>
-</div>
-<div class="group flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 transition-colors">
-<div class="relative size-12 flex-shrink-0">
-<img alt="User Avatar" class="w-full h-full object-cover rounded-none grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZAUX17P0br3TzNN6pjcZ-FBBXPwJClfYm0CmUETyY1vfCYoDVFmYoiTH7oigv988CATyI3hGCEFc34Zd0pAqU8c7OFrpvURtptnWNOdwTxMOm63QaciiFOc73vFDCQYv8S7B_lMG_RQsNJhHUC6eVDkhERReRpsxB9Hfsu7Ng3e0x24zOZbMjoW2KmtRtJ6PmJHATC1sJAb0Fy7FKSvnjkTy6IrHpI89bSQjskLIWw7x1LZL2PGd_XwsqKncxaCuLv1S-msHCbOn3"/>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-baseline mb-1">
-<h3 class="text-sm font-medium text-black uppercase tracking-wide truncate">Prof. Williams</h3>
-<span class="text-[10px] font-mono text-gray-400">Tue</span>
-</div>
-<p class="text-xs text-gray-500 truncate">Please review the attached syllabus.</p>
-</div>
-</div>
-<div class="group flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 transition-colors">
-<div class="relative size-12 flex-shrink-0">
-<img alt="User Avatar" class="w-full h-full object-cover rounded-none grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1Q1gz-Q2wNeg4lj6MwvRyENqnO5k8lvlVFQ1Rfnhni97jFdkAS1cpZ7Y6xOFL-aoZwJlP_9tN4qwWWXMGOJnqPqxxLATFZcJBDOVPBKW28cmaCorcyV34nwj3lPthEGM8QL64EqGqe-Rd0Z8cTaprfc4JJGzMFeCg_sE-zFOeGKSZ_ytX3XuBtQtKJ_ujFgwqbLz9nrh2bwnypo0ihhiGgpNRoJZlAFcFaYNBoIE5fU25_uV1Sjtu6yqYYCL5uHf_vDaGWo5QHNBI"/>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-baseline mb-1">
-<h3 class="text-sm font-medium text-black uppercase tracking-wide truncate">David Chen</h3>
-<span class="text-[10px] font-mono text-gray-400">Mon</span>
-</div>
-<p class="text-xs text-gray-500 truncate">Sounds good, let's meet at the library.</p>
-</div>
-</div>
-<div class="group flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 transition-colors">
-<div class="relative size-12 flex-shrink-0">
-<img alt="User Avatar" class="w-full h-full object-cover rounded-none grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT-CINpB6eYzMrpy1zQ_-Kk7vA_sv3wJWRnCrA5uUJ5vRj2hz22B1kmFOeREhZLSzpfOnyoUL-gU59ifc4OnkdyLuBpHjmMwE3PO8VK5WubFRHnj7spHyNRJvLFuu0byfxNYHWnXRfmpv4q7XqfJ7ihHQ1_dnXAVo3uvEByyvYwycLJjqI2UTn7AD9Mz5GUrJHO__Sv4mC-53VhYQM2tZU6cEKshS4kYn-UXEAuZjdYDT704xbsdku4jSf67j735Qi67B6bjs_8eLV"/>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-baseline mb-1">
-<h3 class="text-sm font-medium text-black uppercase tracking-wide truncate">Jessica Wong</h3>
-<span class="text-[10px] font-mono text-gray-400">Last Week</span>
-</div>
-<p class="text-xs text-gray-500 truncate">Thanks for the help!</p>
-</div>
-</div>
-</div>
-</aside>
-<div class="flex-1 flex flex-col min-w-0 bg-white relative">
-<div class="px-8 py-4 border-b border-black flex items-center justify-between flex-shrink-0 z-10 bg-white/95 backdrop-blur-sm">
-<div class="flex items-center gap-4">
-<div class="size-10">
-<img alt="Current Chat Avatar" class="w-full h-full object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClh3VtLbf-XTYGbNg3i_uIYCPGKFYQmKp2iTUyt1XuLMNHCeQOc9LxtxZAqNnWNLd8s35zMIL8lHSfQbOUGfpPxhuiQ3Qu13LDo6LWLkN187lIcSc8MY4ra58xXVDTWVp_2T0F456vbz3Q5a-HoVSWvNm5iVNdKsSCVLhP2sj-OteT3pLvu2kq4huqaeNiwJWC3MbfghEpkBu86TsZu0F2AfQNYn_YWpEP7snFNdouBKhUORZ1YPeYKeOZrHaiRFeIk2f4bauPd4kY"/>
-</div>
-<div>
-<h2 class="text-lg font-bold text-black uppercase tracking-wide">Sarah Jenkins</h2>
-<p class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">Active Now</p>
-</div>
-</div>
-<div class="flex items-center gap-4">
-<button class="text-black hover:text-gray-600 transition-colors">
-<span class="material-symbols-outlined">phone</span>
-</button>
-<button class="text-black hover:text-gray-600 transition-colors">
-<span class="material-symbols-outlined">videocam</span>
-</button>
-<button class="text-black hover:text-gray-600 transition-colors">
-<span class="material-symbols-outlined">info</span>
-</button>
-</div>
-</div>
-<div class="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col bg-white">
-<div class="flex justify-center my-4">
-<span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Today</span>
-</div>
-<div class="flex items-end gap-3 max-w-[80%] self-start group">
-<div class="size-8 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-<img alt="Sender Avatar" class="w-full h-full object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClh3VtLbf-XTYGbNg3i_uIYCPGKFYQmKp2iTUyt1XuLMNHCeQOc9LxtxZAqNnWNLd8s35zMIL8lHSfQbOUGfpPxhuiQ3Qu13LDo6LWLkN187lIcSc8MY4ra58xXVDTWVp_2T0F456vbz3Q5a-HoVSWvNm5iVNdKsSCVLhP2sj-OteT3pLvu2kq4huqaeNiwJWC3MbfghEpkBu86TsZu0F2AfQNYn_YWpEP7snFNdouBKhUORZ1YPeYKeOZrHaiRFeIk2f4bauPd4kY"/>
-</div>
-<div class="bg-gray-100 p-4 text-sm text-black leading-relaxed">
-<p>Hey! Are you going to the study session later?</p>
-</div>
-<span class="text-[9px] text-gray-400 font-mono mt-1 opacity-0 group-hover:opacity-100 transition-opacity">10:30 AM</span>
-</div>
-<div class="flex items-end gap-3 max-w-[80%] self-start group">
-<div class="size-8 flex-shrink-0">
-<img alt="Sender Avatar" class="w-full h-full object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClh3VtLbf-XTYGbNg3i_uIYCPGKFYQmKp2iTUyt1XuLMNHCeQOc9LxtxZAqNnWNLd8s35zMIL8lHSfQbOUGfpPxhuiQ3Qu13LDo6LWLkN187lIcSc8MY4ra58xXVDTWVp_2T0F456vbz3Q5a-HoVSWvNm5iVNdKsSCVLhP2sj-OteT3pLvu2kq4huqaeNiwJWC3MbfghEpkBu86TsZu0F2AfQNYn_YWpEP7snFNdouBKhUORZ1YPeYKeOZrHaiRFeIk2f4bauPd4kY"/>
-</div>
-<div class="bg-gray-100 p-4 text-sm text-black leading-relaxed">
-<p>I missed the last lecture and I'm totally lost on the new material.</p>
-</div>
-<span class="text-[9px] text-gray-400 font-mono mt-1">10:31 AM</span>
-</div>
-<div class="flex flex-row-reverse items-end gap-3 max-w-[80%] self-end group">
-<div class="size-8 flex-shrink-0 opacity-0"></div> 
-<div class="bg-white border border-black p-4 text-sm text-black leading-relaxed relative">
-<p>Yeah, I'll be there. I have all the notes from Monday.</p>
-</div>
-<span class="text-[9px] text-gray-400 font-mono mt-1 text-right opacity-0 group-hover:opacity-100 transition-opacity">10:35 AM</span>
-</div>
-<div class="flex flex-row-reverse items-end gap-3 max-w-[80%] self-end group">
-<div class="bg-white border border-black p-4 text-sm text-black leading-relaxed relative">
-<p>I can send them to you right now if you want to take a look before we meet.</p>
-</div>
-<span class="text-[9px] text-gray-400 font-mono mt-1 text-right">10:36 AM</span>
-</div>
-<div class="flex items-end gap-3 max-w-[80%] self-start group">
-<div class="size-8 flex-shrink-0">
-<img alt="Sender Avatar" class="w-full h-full object-cover grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClh3VtLbf-XTYGbNg3i_uIYCPGKFYQmKp2iTUyt1XuLMNHCeQOc9LxtxZAqNnWNLd8s35zMIL8lHSfQbOUGfpPxhuiQ3Qu13LDo6LWLkN187lIcSc8MY4ra58xXVDTWVp_2T0F456vbz3Q5a-HoVSWvNm5iVNdKsSCVLhP2sj-OteT3pLvu2kq4huqaeNiwJWC3MbfghEpkBu86TsZu0F2AfQNYn_YWpEP7snFNdouBKhUORZ1YPeYKeOZrHaiRFeIk2f4bauPd4kY"/>
-</div>
-<div class="bg-gray-100 p-4 text-sm text-black leading-relaxed">
-<p>That would be amazing! Can you send me the lecture notes?</p>
-</div>
-<span class="text-[9px] text-gray-400 font-mono mt-1">10:42 AM</span>
-</div>
-</div>
-<div class="p-6 bg-white border-t border-black flex-shrink-0">
-<div class="flex items-end gap-4">
-<button class="text-black hover:text-gray-600 transition-colors p-2 -ml-2">
-<span class="material-symbols-outlined">add_circle</span>
-</button>
-<div class="flex-1 relative">
-<textarea class="w-full bg-gray-50 border-0 p-3 pr-10 text-sm text-black placeholder:text-gray-400 focus:ring-1 focus:ring-black resize-none h-12 py-3" placeholder="Type a message..."></textarea>
-<button class="absolute right-3 top-3 text-gray-400 hover:text-black transition-colors">
-<span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
-</button>
-</div>
-<button class="h-12 px-6 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center justify-center">
+<main class="max-w-[1440px] mx-auto w-full flex h-[calc(100vh-65px)] bg-white overflow-hidden border-x border-black">
+    
+    <!-- Left Sidebar: Chat List (Hidden on mobile by default) -->
+    <aside class="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col border-r border-black h-full bg-white hidden md:flex">
+        
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-black">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-light text-black tracking-tight font-display">Messages</h1>
+                <a href="{% url 'messenger:create_group_chat' %}" class="w-8 h-8 rounded-full flex items-center justify-center border border-black text-black hover:bg-black hover:text-white transition-colors tooltip-target" title="New Group">
+                    <span class="material-symbols-outlined text-[16px]">edit_square</span>
+                </a>
+            </div>
+
+            <!-- Search -->
+            <form method="get" action="{% url 'messenger:chat_list' %}" class="relative flex items-center group">
+                <div class="absolute left-0 text-black">
+                    <span class="material-symbols-outlined text-[18px]">search</span>
+                </div>
+                <input class="w-full h-8 bg-transparent border-b border-gray-300 text-black placeholder:text-gray-400 pl-7 pr-4 focus:outline-none focus:border-black transition-colors text-xs font-mono tracking-wide" placeholder="Search messages..." type="text" name="q"/>
+            </form>
+        </div>
+
+        <!-- Chat List Navigation -->
+        <div class="flex-1 overflow-y-auto no-scrollbar nice-scrollbar">
+            <!-- To make this dynamic, we would need to pass all rooms to this view as well.
+                 For now, we provide a back button to the main list for simplicity. -->
+            <a href="{% url 'messenger:chat_list' %}" class="flex items-center gap-3 p-4 border-b border-black text-xs font-bold uppercase tracking-widest text-black hover:bg-gray-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Back to All Chats
+            </a>
+            
+            <div class="p-8 text-center bg-gray-50 h-full border-b border-black flex flex-col items-center">
+                <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">mark_chat_read</span>
+                <p class="text-xs font-mono text-gray-500 uppercase tracking-widest">Active Chat</p>
+                <p class="text-sm font-bold mt-1 text-black">
+                    {% if room.room_type == 'group' %}
+                        {{ room.name }}
+                    {% else %}
+                        {{ other_participants.first.user.username }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center Content: Active Chat Room -->
+    <div class="flex-1 flex flex-col min-w-0 bg-white relative">
+        
+        <!-- Chat Header -->
+        <header class="px-6 md:px-8 py-4 border-b border-black flex items-center justify-between flex-shrink-0 z-10 bg-white">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'messenger:chat_list' %}" class="md:hidden w-8 h-8 flex items-center justify-center -ml-2 text-black hover:bg-gray-100 rounded-full">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                </a>
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-black shrink-0">
+                    {% if room.room_type == 'one_to_one' %}
+                        {% if other_participants.first.user.profile_picture %}
+                            <img src="{{ other_participants.first.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                        {% endif %}
+                    {% else %}
+                        <div class="w-full h-full bg-black text-white flex items-center justify-center font-bold font-mono">
+                            {{ room.name|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-black uppercase tracking-wide">
+                        {% if room.room_type == 'group' %}
+                            {{ room.name }}
+                        {% else %}
+                            {{ other_participants.first.user.username }}
+                        {% endif %}
+                    </h2>
+                    <p class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+                        {% if room.room_type == 'group' %}
+                            {{ room.participants.count }} Participants
+                        {% else %}
+                            Active Chat
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                {% if room.room_type == 'one_to_one' %}
+                    <a href="{% url 'videocall:create_private_room' other_participants.first.user.username %}" class="w-10 h-10 flex items-center justify-center text-black hover:bg-gray-100 rounded-full transition-colors tooltip-target" title="Start Video Call">
+                        <span class="material-symbols-outlined">videocam</span>
+                    </a>
+                {% endif %}
+                <button class="w-10 h-10 flex items-center justify-center text-black hover:bg-gray-100 rounded-full transition-colors tooltip-target" title="Chat Info">
+                    <span class="material-symbols-outlined">info</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Messages Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 flex flex-col bg-white" id="chat-messages">
+            
+            <div class="flex justify-center my-4">
+                <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest px-3 py-1 border border-gray-200 rounded-full">
+                    Beginning of Chat History
+                </span>
+            </div>
+
+            {% for message in messages %}
+                {% if message.user != user %}
+                    <!-- Received Message -->
+                    <div class="flex items-end gap-3 max-w-[85%] md:max-w-[70%] self-start group">
+                        <a href="{% url 'accounts:profile' message.user.username %}" class="w-8 h-8 rounded-full border border-black overflow-hidden flex-shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                            {% if message.user.profile_picture %}
+                                <img src="{{ message.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                            {% endif %}
+                        </a>
+                        <div class="flex flex-col items-start gap-1">
+                            {% if room.room_type == 'group' %}
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">@{{ message.user.username }}</span>
+                            {% endif %}
+                            <div class="bg-gray-100 p-3 md:p-4 text-sm text-black leading-relaxed rounded-tr-xl rounded-br-xl rounded-tl-xl border border-transparent">
+                                {% if message.image %}
+                                    <img src="{{ message.image.url }}" alt="Attachment" class="max-w-full rounded mb-2 border border-gray-200">
+                                {% endif %}
+                                <p class="whitespace-pre-wrap">{{ message.content }}</p>
+                            </div>
+                            <span class="text-[9px] text-gray-400 font-mono ml-1 {% if not forloop.last %}opacity-0 group-hover:opacity-100{% endif %} transition-opacity">{{ message.created_at|date:"h:i A" }}</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Sent Message -->
+                    <div class="flex items-end gap-3 max-w-[85%] md:max-w-[70%] self-end group flex-row-reverse">
+                        <div class="w-8 h-8 flex-shrink-0 opacity-0 hidden md:block"></div>
+                        <div class="flex flex-col items-end gap-1">
+                            <div class="bg-white border border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-3 md:p-4 text-sm text-black leading-relaxed rounded-tl-xl rounded-bl-xl rounded-tr-xl">
+                                {% if message.image %}
+                                    <img src="{{ message.image.url }}" alt="Attachment" class="max-w-full rounded mb-2 border border-black">
+                                {% endif %}
+                                <p class="whitespace-pre-wrap">{{ message.content }}</p>
+                            </div>
+                            <span class="text-[9px] text-gray-400 font-mono mr-1 {% if not forloop.last %}opacity-0 group-hover:opacity-100{% endif %} transition-opacity">{{ message.created_at|date:"h:i A" }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+            {% empty %}
+                <div class="flex-1 flex flex-col items-center justify-center opacity-50 my-10">
+                    <span class="material-symbols-outlined text-4xl mb-2 text-gray-400">waving_hand</span>
+                    <p class="text-xs font-mono uppercase tracking-widest text-gray-500 text-center">No messages yet.<br>Send a message to start the conversation!</p>
+                </div>
+            {% endfor %}
+            
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="p-4 md:p-6 bg-gray-50 border-t border-black flex-shrink-0">
+            <form action="{% url 'messenger:send_message' room.id %}" method="post" enctype="multipart/form-data" class="flex items-end gap-3 md:gap-4">
+                {% csrf_token %}
+                
+                <div class="hidden">
+                    <input type="file" name="image" id="id_image" accept="image/*">
+                </div>
+                
+                <button type="button" onclick="document.getElementById('id_image').click()" class="w-12 h-12 flex items-center justify-center border border-black bg-white hover:bg-gray-100 transition-colors shrink-0 text-black tooltip-target" title="Attach Image">
+                    <span class="material-symbols-outlined">attachment</span>
+                </button>
+                
+                <div class="flex-1 relative">
+                    <div class="absolute right-0 top-0 bottom-0 text-[10px] font-mono text-gray-400 py-3 hidden md:block border-l border-gray-200">
+                        {{ form.content.errors }}
+                    </div>
+                    <textarea name="content" required id="id_content" class="w-full bg-white border border-black p-3 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-black resize-none h-12 transition-all nice-scrollbar focus:h-24 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" placeholder="Type a message..."></textarea>
+                </div>
+                
+                <button type="submit" class="h-12 px-6 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center justify-center shrink-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
                     Send
                 </button>
-</div>
-</div>
-</div>
+            </form>
+        </div>
+    </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Scroll to bottom of messages on load
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Connect to WebSocket for real-time messages if supported by backend routing
+    const roomId = '{{ room.id }}';
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    try {
+        const chatSocket = new WebSocket(protocol + window.location.host + '/ws/chat/' + roomId + '/');
+        
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'chat_message' && data.user_id !== {{ user.id|default:"0" }}) {
+                // Determine if we need to auto-scroll after appending
+                const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 50;
+                
+                // Add the new message to DOM based on group or one-to-one
+                const isGroup = '{{ room.room_type }}' === 'group';
+                
+                const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const messageHtml = `
+                    <div class="flex items-end gap-3 max-w-[85%] md:max-w-[70%] self-start group">
+                        <div class="w-8 h-8 rounded-full border border-black overflow-hidden flex-shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                            <img src="/static/img/default_profile.png" alt="Profile" class="w-full h-full object-cover grayscale">
+                        </div>
+                        <div class="flex flex-col items-start gap-1">
+                            ${isGroup ? `<span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">@${data.user}</span>` : ''}
+                            <div class="bg-gray-100 p-3 md:p-4 text-sm text-black leading-relaxed rounded-tr-xl rounded-br-xl rounded-tl-xl border border-transparent">
+                                ${data.image ? `<img src="${data.image}" alt="Attachment" class="max-w-full rounded mb-2 border border-gray-200">` : ''}
+                                <p class="whitespace-pre-wrap">${data.content}</p>
+                            </div>
+                            <span class="text-[9px] text-gray-400 font-mono ml-1 transition-opacity">${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Remove empty state if present
+                const emptyState = messagesContainer.querySelector('.waving_hand');
+                if (emptyState) emptyState.parentElement.remove();
+                
+                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                
+                if (isScrolledToBottom) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }
+        };
+    } catch(e) {
+        console.log("WebSocket not configured or unreachable for chat room.");
+    }
+</script>
 {% endblock %}

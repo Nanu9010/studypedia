@@ -74,7 +74,7 @@
                         </button>
                     </div>
                     {% if coupon %}
-                        <a href="{% url 'ecommerce:checkout' %}" class="flex cursor-pointer items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest shrink-0">
+                        <a href="{% url 'ecommerce:remove_coupon' %}" class="flex cursor-pointer items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest shrink-0">
                             Remove
                         </a>
                     {% endif %}

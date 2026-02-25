@@ -1,66 +1,161 @@
 {% extends 'base.html' %}
-{% block title %}Social Feed - StudyPedia
-</div></div>
-{% endblock %}
 {% load static %}
-{% block content %}
-<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
 
-<div class="container">
-    <h1 class="text-center mb-4">Social Feed</h1>
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
+{% block title %}Social Feed - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8">
+    
+    <!-- Left Sidebar: Profile & Nav -->
+    <aside class="w-full md:w-1/4 flex flex-col gap-6 shrink-0 md:sticky md:top-24 self-start">
+        {% if user.is_authenticated %}
+        <div class="bg-white border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden flex flex-col">
+            <!-- Header Pattern -->
+            <div class="h-24 bg-black border-b border-black">
+                <div class="w-full h-full opacity-30" style="background-image: repeating-linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333), repeating-linear-gradient(45deg, #333 25%, #000 25%, #000 75%, #333 75%, #333); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+            </div>
+            <!-- Profile Info -->
+            <div class="px-6 pb-6 pt-0 relative flex flex-col items-center">
+                <div class="w-20 h-20 bg-gray-200 border-2 border-black rounded-full overflow-hidden -mt-10 mb-4 z-10 shrink-0">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                    {% endif %}
+                </div>
+                <h3 class="text-xl font-display font-bold uppercase tracking-tight text-center">{{ user.name|default:user.username }}</h3>
+                <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-6">@{{ user.username }}</p>
+                <a href="{% url 'accounts:profile' %}" class="w-full text-center border-t border-black pt-4 text-xs font-bold uppercase tracking-widest text-black hover:text-amber-600 transition-colors">
+                    View My Profile
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="bg-white border border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 border-b border-black pb-2">Network</h3>
+            <div class="flex flex-col gap-2">
+                <a href="{% url 'social:social_feed' %}" class="flex items-center gap-3 px-3 py-2 bg-black text-white text-sm font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">dynamic_feed</span> Main Feed
+                </a>
+                <a href="{% url 'messenger:chat_list' %}" class="flex items-center gap-3 px-3 py-2 text-black hover:bg-gray-100 transition-colors text-sm font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">forum</span> Messages
+                </a>
+                <a href="{% url 'notifications:notifications_list' %}" class="flex items-center gap-3 px-3 py-2 text-black hover:bg-gray-100 transition-colors text-sm font-bold uppercase tracking-widest relative">
+                    <span class="material-symbols-outlined text-[18px]">notifications</span> Notifications
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center Content: Feed -->
+    <main class="w-full md:w-1/2 flex flex-col gap-6">
+        
+        <div class="flex items-center justify-between border-b border-black pb-4">
+            <h1 class="text-3xl font-light font-display uppercase tracking-tight text-black">Social Feed</h1>
+            <a href="{% url 'social:create_post' %}" class="flex items-center justify-center bg-black text-white h-10 px-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black border border-black transition-colors gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                <span class="material-symbols-outlined text-[16px]">draw</span> Write Post
+            </a>
+        </div>
+
+        {% if messages %}
+            <div class="flex flex-col gap-2 mb-2">
+                {% for message in messages %}
+                    <div class="p-3 border border-black text-xs font-bold uppercase tracking-widest {% if message.tags == 'error' %}bg-red-50 text-red-600{% elif message.tags == 'success' %}bg-green-50 text-green-600{% else %}bg-gray-50 text-black{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div id="post-list" class="flex flex-col gap-6">
+            {% for post in page_obj %}
+                <article class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col transition-all duration-300">
+                    
+                    <!-- Post Header -->
+                    <div class="p-4 md:p-6 border-b border-black flex justify-between items-start bg-gray-50">
+                        <div class="flex items-center gap-4">
+                            <a href="{% url 'accounts:profile' post.user.username %}" class="w-12 h-12 rounded-full border border-black overflow-hidden shrink-0 block hover:opacity-80 transition-opacity">
+                                {% if post.user.profile_picture %}
+                                    <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                                {% else %}
+                                    <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                                {% endif %}
+                            </a>
+                            <div class="flex flex-col">
+                                <a href="{% url 'accounts:profile' post.user.username %}" class="text-base font-bold uppercase tracking-wide hover:underline underline-offset-2">@{{ post.user.username }}</a>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500">{{ post.created_at|date:"M d, Y • h:i A" }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if post.user == user %}
+                        <div class="relative group/menu">
+                            <button class="w-8 h-8 rounded-full hover:bg-gray-200 border border-transparent hover:border-black flex items-center justify-center transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+                            <div class="absolute right-0 top-full mt-1 w-32 bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-opacity z-10 flex flex-col">
+                                <a href="{% url 'social:edit_post' post.pk %}" class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black hover:bg-gray-100 border-b border-black">Edit</a>
+                                <a href="{% url 'social:delete_post' post.pk %}" class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-red-600 hover:bg-red-50" onclick="return confirm('Delete this post?');">Delete</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Content -->
+                    <div class="p-4 md:p-6 pb-2">
+                        <p class="text-sm md:text-base text-gray-800 whitespace-pre-line leading-relaxed">{{ post.content }}</p>
+                    </div>
+
+                    {% if post.image %}
+                        <div class="w-full border-t border-b border-black max-h-[500px] overflow-hidden bg-gray-100">
+                            <img src="{{ post.image.url }}" alt="Post attachment" class="w-full h-full object-contain" loading="lazy">
+                        </div>
+                    {% endif %}
+
+                    <!-- Post Actions -->
+                    <div class="p-4 bg-gray-50 border-t border-black flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <a href="{% url 'social:post_detail' post.pk %}" class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-black transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">chat_bubble</span> Comments
+                            </a>
+                        </div>
+                        
+                        {% if post.user != user %}
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'messenger:start_chat' post.user.username %}" class="flex items-center gap-1 bg-black text-white border border-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors tooltip-target" title="Send Message">
+                                <span class="material-symbols-outlined text-[14px]">chat</span>
+                            </a>
+                            <a href="{% url 'videocall:create_private_room' post.user.username %}" class="flex items-center gap-1 bg-green-600 text-white border border-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-green-700 transition-colors tooltip-target" title="Video Call">
+                                <span class="material-symbols-outlined text-[14px]">videocam</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% empty %}
+                <div class="py-24 flex flex-col items-center justify-center border border-black bg-gray-50 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="w-16 h-16 bg-white border border-black flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-3xl text-gray-400">group_off</span>
+                    </div>
+                    <h3 class="text-lg font-bold uppercase tracking-wide text-black mb-2">No Posts Found</h3>
+                    <p class="text-sm font-mono text-gray-500 max-w-sm px-4">Follow users or create your first post to see content here!</p>
+                </div>
             {% endfor %}
         </div>
-    {% endif %}
 
-<!--    <form method="get" class="mb-4">-->
-<!--        <div class="input-group">-->
-<!--            <input type="text" name="q" class="w-full h-12 bg-transparent border-b border-gray-300 text-black placeholder:text-gray-400 px-4 focus:outline-none focus:border-black transition-colors text-sm font-mono tracking-wide" placeholder="Search posts or users..." value="{{ search_query|default:'' }}">-->
-<!--            <button class="flex cursor-pointer items-center justify-center border border-gray-300 hover:border-black hover:bg-gray-50 text-black transition-colors h-10 px-4 text-xs font-bold uppercase tracking-wide w-full" type="submit">🔍</button>-->
-<!--        </div>-->
-<!--    </form>-->
+    </main>
 
-    <div class="post-grid" id="post-list">
-        {% for post in page_obj %}
-            <div class="post-item card mb-3">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        {% if post.user.profile_picture %}
-                            <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                        {% else %}
-                            <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                        {% endif %}
-                        <h5 class="mb-0"><a href="{% url 'accounts:profile' post.user.username %}">@{{ post.user.username }}</a></h5>
+    <!-- Right Sidebar: Suggested or Ad Space -->
+    <aside class="w-full md:w-1/4 flex flex-col gap-6 shrink-0 md:sticky md:top-24 self-start hidden lg:flex">
+        <div class="bg-gray-50 border border-black p-6 border-dashed text-center h-64 flex flex-col justify-center items-center">
+            <span class="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">Sponsored Space</span>
+            <p class="text-[10px] mt-2 text-gray-400 font-mono">Premium ads displayed here.</p>
+        </div>
+    </aside>
 
-                    </div>
-                    <p class="mt-2">{{ post.content|truncatechars:100 }}</p>
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="Post Image" class="post-image" loading="lazy">
-                    {% endif %}
-                    <p class="text-muted small mt-1">{{ post.created_at|date:"F d, Y H:i" }}</p>
-                    <div class="actions d-flex mt-2">
-                        <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-info">Comments</a>
-                        {% if post.user == user %}
-                            <a href="{% url 'social:edit_post' post.pk %}" class="btn btn-sm btn-primary ml-2">Edit</a>
-                            <a href="{% url 'social:delete_post' post.pk %}" class="btn btn-sm btn-danger ml-2">Delete</a>
-                        {% else %}
-                            <a href="{% url 'messenger:start_chat' post.user.username %}" class="btn btn-sm btn-info ml-2">Chat</a>
-                            <a href="{% url 'videocall:create_private_room' post.user.username %}" class="btn btn-sm btn-success ml-2">Video Call</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p class="text-center">No posts found. {% if search_query %}Try a different search.{% else %}Follow users to see their posts!{% endif %}</p>
-        {% endfor %}
-    </div>
 </div>
-
-</div></div>
 {% endblock %}
+
 {% block scripts %}
 <script>
     const chatSocket = new WebSocket(`ws://${window.location.host}/ws/social/`);
@@ -69,33 +164,49 @@
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         if (data.type === 'new_post') {
-            const postDiv = document.createElement('div');
-            postDiv.className = 'post-item card mb-3';
-            postDiv.innerHTML = `
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <img src="${data.image || '/static/img/default_profile.png'}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                        <h5 class="mb-0"><a href="/accounts/profile/${data.username}/">@${data.username}</a></h5>
-                        <form action="/social/post/${data.post_id}/like/" method="post" class="ml-auto">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Like</button>
-                        </form>
+            const postHTML = `
+                <article class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col transition-all duration-300">
+                    <div class="p-4 md:p-6 border-b border-black flex justify-between items-start bg-gray-50">
+                        <div class="flex items-center gap-4">
+                            <a href="/accounts/profile/${data.username}/" class="w-12 h-12 rounded-full border border-black overflow-hidden shrink-0 block hover:opacity-80 transition-opacity">
+                                <img src="${data.image || '/static/img/default_profile.png'}" alt="Profile" class="w-full h-full object-cover">
+                            </a>
+                            <div class="flex flex-col">
+                                <a href="/accounts/profile/${data.username}/" class="text-base font-bold uppercase tracking-wide hover:underline underline-offset-2">@${data.username}</a>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500">Just now</span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mt-2">${data.content}</p>
-                    ${data.image ? `<img src="${data.image}" alt="Post Image" class="post-image" loading="lazy">` : ''}
-                    <p class="text-muted small mt-1">${new Date(data.created_at).toLocaleString()}</p>
-                    <div class="actions d-flex mt-2">
-                        <a href="/social/post/${data.post_id}/" class="btn btn-sm btn-info">Comments</a>
-                        <a href="/messenger/start/${data.username}/" class="btn btn-sm btn-info ml-2">Chat</a>
-                        <a href="/videocall/create_private_room/${data.username}/" class="btn btn-sm btn-success ml-2">Video Call</a>
+                    <div class="p-4 md:p-6 pb-2">
+                        <p class="text-sm md:text-base text-gray-800 whitespace-pre-line leading-relaxed">${data.content}</p>
                     </div>
-                </div>
+                    ${data.image ? `
+                        <div class="w-full border-t border-b border-black max-h-[500px] overflow-hidden bg-gray-100">
+                            <img src="${data.image}" alt="Post attachment" class="w-full h-full object-contain" loading="lazy">
+                        </div>
+                    ` : ''}
+                    <div class="p-4 bg-gray-50 border-t border-black flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <a href="/social/post/${data.post_id}/" class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-black transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">chat_bubble</span> Comments
+                            </a>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="/messenger/start/${data.username}/" class="flex items-center gap-1 bg-black text-white border border-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors tooltip-target" title="Send Message">
+                                <span class="material-symbols-outlined text-[14px]">chat</span>
+                            </a>
+                            <a href="/videocall/create_private_room/${data.username}/" class="flex items-center gap-1 bg-green-600 text-white border border-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest hover:bg-green-700 transition-colors tooltip-target" title="Video Call">
+                                <span class="material-symbols-outlined text-[14px]">videocam</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             `;
-            postList.prepend(postDiv);
-        } else if (data.type === 'new_comment') {
-            // Update post detail (requires client-side logic or redirect)
-            console.log('New comment on post:', data.post_id);
-            // Optionally fetch post_detail and update DOM
+            // remove empty state if there
+            if(postList.querySelector('.py-24.flex.flex-col')) {
+                postList.innerHTML = '';
+            }
+            postList.insertAdjacentHTML('afterbegin', postHTML);
         }
     };
 
@@ -105,16 +216,15 @@
         if (!page) return;
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 && !loading) {
             loading = true;
-            const searchQuery = "{{ search_query|escapejs }}";
-            const url = `?page=${page}${searchQuery ? '&q=' + encodeURIComponent(searchQuery) : ''}`;
+            const url = `?page=${page}`;
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const newPosts = doc.querySelector('#post-list').innerHTML;
-                    if (newPosts) {
-                        document.querySelector('#post-list').insertAdjacentHTML('beforeend', newPosts);
+                    const newPostsHTML = Array.from(doc.querySelectorAll('#post-list article')).map(el => el.outerHTML).join('');
+                    if (newPostsHTML) {
+                        document.querySelector('#post-list').insertAdjacentHTML('beforeend', newPostsHTML);
                         page++;
                     }
                     loading = false;
@@ -123,6 +233,4 @@
         }
     });
 </script>
-
-</div></div>
 {% endblock %}

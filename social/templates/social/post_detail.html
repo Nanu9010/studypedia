@@ -1,72 +1,143 @@
 {% extends 'base.html' %}
-{% block title %}Post Detail - StudyPedia
-</div></div>
-{% endblock %}
 {% load static %}
+
+{% block title %}Post Detail - StudyPedia{% endblock %}
+
 {% block content %}
-<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col items-center">
+    
+    <div class="w-full max-w-3xl flex flex-col gap-6">
+        
+        <!-- Navigation Back -->
+        <a href="{% url 'social:social_feed' %}" class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors self-start mb-2 border border-transparent hover:border-black px-3 py-1">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Back to Feed
+        </a>
 
-<div class="container">
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex align-items-center">
-                {% if post.user.profile_picture %}
-                    <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                {% else %}
-                    <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                {% endif %}
-                <h5><a href="{% url 'accounts:profile' post.user.username %}">@{{ post.user.username }}</a></h5>
-            </div>
-            <p class="mt-2">{{ post.content }}</p>
-            {% if post.image %}
-                <img src="{{ post.image.url }}" alt="Post Image" class="post-image img-fluid">
-            {% endif %}
-            <p class="text-muted small mt-1">{{ post.created_at|date:"F d, Y H:i" }}</p>
-            <div class="actions d-flex mt-2">
-                {% if post.user == user %}
-                    <a href="{% url 'social:edit_post' post.pk %}" class="btn btn-sm btn-primary mr-2">Edit</a>
-                    <a href="{% url 'social:delete_post' post.pk %}" class="btn btn-sm btn-danger mr-2">Delete</a>
-                {% endif %}
-                <form action="{% url 'social:like_post' post.pk %}" method="post" class="mr-2">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Like</button>
-                </form>
-                <a href="{% url 'social:social_feed' %}" class="btn btn-sm btn-secondary">Back</a>
-            </div>
-        </div>
-    </div>
-
-    <h4>Comments</h4>
-    {% for comment in comments %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    {% if comment.user.profile_picture %}
-                        <img src="{{ comment.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                    {% endif %}
-                    <p><strong><a href="{% url 'accounts:profile' comment.user.username %}">@{{ comment.user.username }}</a></strong>: {{ comment.content }}</p>
+        <!-- Main Post -->
+        <article class="bg-white border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col">
+            <div class="p-6 md:p-8 border-b border-black flex justify-between items-start bg-gray-50">
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'accounts:profile' post.user.username %}" class="w-14 h-14 rounded-full border border-black overflow-hidden shrink-0 block hover:opacity-80 transition-opacity">
+                        {% if post.user.profile_picture %}
+                            <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                        {% endif %}
+                    </a>
+                    <div class="flex flex-col">
+                        <a href="{% url 'accounts:profile' post.user.username %}" class="text-lg font-bold uppercase tracking-wide hover:underline underline-offset-2">@{{ post.user.username }}</a>
+                        <span class="text-xs font-mono uppercase tracking-widest text-gray-500">{{ post.created_at|date:"M d, Y • h:i A" }}</span>
+                    </div>
                 </div>
-                <p class="text-muted small">{{ comment.created_at|date:"F d, Y H:i" }}</p>
+                
+                {% if post.user == user %}
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'social:edit_post' post.pk %}" class="w-8 h-8 rounded-full hover:bg-black hover:text-white border border-transparent hover:border-black flex items-center justify-center transition-colors tooltip-target" title="Edit Post">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                    </a>
+                    <a href="{% url 'social:delete_post' post.pk %}" class="w-8 h-8 rounded-full text-red-600 hover:bg-red-600 hover:text-white border border-transparent hover:border-black flex items-center justify-center transition-colors tooltip-target" title="Delete Post" onclick="return confirm('Delete this post?');">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </a>
+                </div>
+                {% endif %}
             </div>
-        </div>
-    {% empty %}
-        <p>No comments yet.</p>
-    {% endfor %}
 
-    {% if user.is_authenticated %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Add Comment</button>
-                </form>
+            <div class="p-6 md:p-8 pb-4">
+                <p class="text-base md:text-lg text-black whitespace-pre-line leading-relaxed font-light">{{ post.content }}</p>
             </div>
+
+            {% if post.image %}
+                <div class="w-full border-t border-b border-black max-h-[800px] overflow-hidden bg-gray-100 p-4 flex justify-center">
+                    <img src="{{ post.image.url }}" alt="Post attachment" class="max-w-full max-h-[750px] object-contain border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                </div>
+            {% endif %}
+
+            <div class="p-4 bg-gray-50 border-t border-black flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <form action="{% url 'social:like_post' post.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black hover:text-amber-600 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">favorite</span> Like
+                        </button>
+                    </form>
+                    <span class="text-gray-300">|</span>
+                    <span class="text-xs font-mono text-gray-500 uppercase tracking-widest">{{ comments.count|default:"0" }} Comments</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Comments Section -->
+        <div class="mt-4 flex flex-col gap-6">
+            <h3 class="text-xl font-display font-bold uppercase tracking-tight text-black flex items-center gap-2 border-b border-black pb-4">
+                <span class="material-symbols-outlined">forum</span> Discussion
+            </h3>
+
+            <!-- Comment Form -->
+            {% if user.is_authenticated %}
+                <div class="bg-white border border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4">
+                    <style>
+                        .django-comment-form textarea {
+                            width: 100%;
+                            min-height: 80px;
+                            padding: 0.75rem 1rem;
+                            border: 1px solid #000;
+                            background-color: #f9fafb;
+                            font-family: inherit;
+                            font-size: 0.875rem;
+                            resize: vertical;
+                            transition: all 0.2s;
+                        }
+                        .django-comment-form textarea:focus {
+                            outline: none;
+                            background-color: #fff;
+                            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+                        }
+                        .django-comment-form label { display: none; }
+                    </style>
+                    <form method="post" class="django-comment-form flex flex-col items-end gap-4">
+                        {% csrf_token %}
+                        <div class="w-full">
+                            {{ form.as_p }}
+                        </div>
+                        <button type="submit" class="flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-xs font-bold uppercase tracking-widest">
+                            Reply
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Comments List -->
+            <div class="flex flex-col gap-4">
+                {% for comment in comments %}
+                    <div class="bg-white border border-black p-4 md:p-6 flex flex-col gap-3 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <a href="{% url 'accounts:profile' comment.user.username %}" class="w-8 h-8 rounded-full border border-black overflow-hidden shrink-0 block">
+                                    {% if comment.user.profile_picture %}
+                                        <img src="{{ comment.user.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                                    {% endif %}
+                                </a>
+                                <div>
+                                    <a href="{% url 'accounts:profile' comment.user.username %}" class="text-xs font-bold uppercase tracking-wider hover:underline underline-offset-2">@{{ comment.user.username }}</a>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">{{ comment.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <p class="text-sm text-gray-800 whitespace-pre-line pl-11">{{ comment.content }}</p>
+                    </div>
+                {% empty %}
+                    <div class="py-12 border border-black border-dashed bg-gray-50 flex flex-col items-center justify-center text-center px-4">
+                        <span class="material-symbols-outlined text-3xl text-gray-300 mb-2">chat_bubble_outline</span>
+                        <p class="text-sm font-bold uppercase tracking-wide text-gray-500 mb-1">No comments yet</p>
+                        <p class="text-xs font-mono text-gray-400">Be the first to share your thoughts!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
         </div>
-    {% endif %}
+
+    </div>
 </div>
-
-</div></div>
 {% endblock %}

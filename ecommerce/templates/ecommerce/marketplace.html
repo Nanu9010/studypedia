@@ -90,7 +90,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for note in featured_notes|slice:":3" %}
                     <div class="bg-white border border-black p-4 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                        <a href="#" class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
+                        <div class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
                             {% if note.image %}
                                 <img src="{{ note.image.url }}" alt="{{ note.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             {% else %}
@@ -99,9 +99,9 @@
                                 </div>
                             {% endif %}
                             <div class="absolute top-2 left-2 bg-white border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-black">Note</div>
-                        </a>
+                        </div>
                         <div class="flex flex-col flex-grow">
-                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ note.name }}"><a href="#">{{ note.name }}</a></h3>
+                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ note.name }}"><span>{{ note.name }}</span></h3>
                             <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-4 truncate">{{ note.branch.name }} ({{ note.branch.degree.name }})</p>
                             
                             <div class="mt-auto flex items-center justify-between pt-4 border-t border-black/10">
@@ -133,7 +133,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for paper in featured_papers|slice:":3" %}
                     <div class="bg-white border border-black p-4 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                        <a href="#" class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
+                        <div class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
                             {% if paper.image %}
                                 <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500">
                             {% else %}
@@ -142,9 +142,9 @@
                                 </div>
                             {% endif %}
                             <div class="absolute top-2 left-2 bg-black border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white">Paper</div>
-                        </a>
+                        </div>
                         <div class="flex flex-col flex-grow">
-                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ paper.name }}"><a href="#">{{ paper.name }}</a></h3>
+                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ paper.name }}"><span>{{ paper.name }}</span></h3>
                             <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-4 truncate">{{ paper.get_exam_type_display }} &bull; {{ paper.branch.name }}</p>
                             
                             <div class="mt-auto flex items-center justify-between pt-4 border-t border-black/10">

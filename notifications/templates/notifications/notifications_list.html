@@ -1,111 +1,181 @@
 {% extends 'base.html' %}
-{% block title %}Notifications - StudyPedia
-</div></div>
-{% endblock %}
 {% load static %}
+
+{% block title %}Notifications - StudyPedia{% endblock %}
+
 {% block content %}
-<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-
-<div class="container">
-    <h1 class="text-center mb-4">Notifications</h1>
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8">
+    
+    <!-- Left Sidebar: General Nav -->
+    <aside class="w-full md:w-1/4 flex flex-col gap-6 shrink-0 md:sticky md:top-24 self-start">
+        <div class="bg-white border border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 border-b border-black pb-2">Network</h3>
+            <div class="flex flex-col gap-2">
+                <a href="{% url 'social:social_feed' %}" class="flex items-center gap-3 px-3 py-2 text-black hover:bg-gray-100 transition-colors text-sm font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">dynamic_feed</span> Main Feed
+                </a>
+                <a href="{% url 'messenger:chat_list' %}" class="flex items-center gap-3 px-3 py-2 text-black hover:bg-gray-100 transition-colors text-sm font-bold uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">forum</span> Messages
+                </a>
+                <a href="{% url 'notifications:notifications_list' %}" class="flex items-center justify-between px-3 py-2 bg-black text-white text-sm font-bold uppercase tracking-widest">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[18px]">notifications</span> Notifications
+                    </div>
+                </a>
+            </div>
         </div>
-    {% endif %}
+    </aside>
 
-    <form method="post" action="">
-        {% csrf_token %}
-        <div class="card mb-4">
-            <div class="card-body">
+    <!-- Center Content: Notifications List -->
+    <main class="w-full md:w-3/4 flex flex-col gap-6">
+        
+        <div class="flex items-center justify-between border-b border-black pb-4">
+            <h1 class="text-3xl font-light font-display uppercase tracking-tight text-black flex items-center gap-2">
+                Notifications <span class="material-symbols-outlined text-3xl">notifications_active</span>
+            </h1>
+        </div>
+
+        {% if messages %}
+            <div class="flex flex-col gap-2 mb-2">
+                {% for message in messages %}
+                    <div class="p-3 border border-black text-xs font-bold uppercase tracking-widest {% if message.tags == 'error' %}bg-red-50 text-red-600{% elif message.tags == 'success' %}bg-green-50 text-green-600{% else %}bg-gray-50 text-black{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="" id="notif-form" class="flex flex-col gap-4">
+            {% csrf_token %}
+            
+            {% if not page_obj.object_list|all_is_read and page_obj.object_list|length > 0 %}
+                <div class="flex justify-end mb-2">
+                    <button type="submit" class="bg-black text-white px-6 py-2 border border-black text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                        Mark Selected as Read
+                    </button>
+                </div>
+            {% endif %}
+
+            <div class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col divide-y divide-black/10" id="notif-list">
                 {% for notification in page_obj %}
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                {% if notification.sender.profile_picture %}
-                                    <img src="{{ notification.sender.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                {% else %}
-                                    <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                    <div class="p-4 md:p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 {% if not notification.is_read %}bg-yellow-50/50{% endif %}">
+                        
+                        <a href="{% url 'accounts:profile' notification.sender.username %}" class="w-10 h-10 rounded-full border border-black overflow-hidden shrink-0 block hover:opacity-80 transition-opacity">
+                            {% if notification.sender.profile_picture %}
+                                <img src="{{ notification.sender.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="w-full h-full object-cover grayscale">
+                            {% endif %}
+                        </a>
+
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-black mb-1 leading-snug">
+                                <strong><a href="{% url 'accounts:profile' notification.sender.username %}" class="hover:underline">@{{ notification.sender.username }}</a></strong>
+                                
+                                {% if notification.type == 'comment' %}
+                                    <span class="text-gray-700">commented on your post.</span>
+                                {% elif notification.type == 'follow' %}
+                                    <span class="text-gray-700">started following you.</span>
+                                {% elif notification.type == 'message' %}
+                                    <span class="text-gray-700">sent you a direct message.</span>
+                                {% elif notification.type == 'like' %}
+                                    <span class="text-gray-700">liked your post.</span>
                                 {% endif %}
-                                <div>
-                                    <p class="mb-0">
-                                        <strong><a href="{% url 'accounts:profile' notification.sender.username %}">@{{ notification.sender.username }}</a></strong>
-                                        {% if notification.type == 'comment' %}
-                                            commented on your post.
-                                        {% elif notification.type == 'follow' %}
-                                            followed you.
-                                        {% elif notification.type == 'message' %}
-                                            sent you a message.
-                                        {% elif notification.type == 'like' %}
-                                            liked your post.
-                                        {% endif %}
-                                    </p>
-                                    {% if notification.related_post %}
-                                        <a href="{% url 'social:post_detail' notification.related_post.pk %}">View Post</a>
-                                    {% elif notification.related_message %}
-                                        <a href="{% url 'messenger:chat_room' notification.related_message.room.id %}">View Chat</a>
-                                    {% endif %}
-                                    <p class="text-muted small">{{ notification.created_at|date:"F d, Y H:i" }}</p>
-                                </div>
-                                <input type="checkbox" name="notification_ids" value="{{ notification.id }}" class="ml-auto" {% if notification.is_read %}disabled{% endif %}>
+                            </p>
+                            
+                            <div class="flex items-center gap-4 mt-2">
+                                <p class="text-[10px] font-mono uppercase tracking-widest text-gray-500">{{ notification.created_at|date:"M d, Y • h:i A" }}</p>
+                                
+                                {% if notification.related_post %}
+                                    <a href="{% url 'social:post_detail' notification.related_post.pk %}" class="text-[10px] font-bold uppercase tracking-widest text-black hover:text-amber-600 transition-colors flex items-center gap-1">
+                                        View Post <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+                                    </a>
+                                {% elif notification.related_message %}
+                                    <a href="{% url 'messenger:chat_room' notification.related_message.room.id %}" class="text-[10px] font-bold uppercase tracking-widest text-black hover:text-amber-600 transition-colors flex items-center gap-1">
+                                        View Chat <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+                                    </a>
+                                {% endif %}
                             </div>
+                        </div>
+
+                        <div class="shrink-0 flex items-center justify-center pt-1">
+                            <input type="checkbox" name="notification_ids" value="{{ notification.id }}" class="w-5 h-5 border-black text-black focus:ring-black rounded-none cursor-pointer" {% if notification.is_read %}disabled checked opacity-50{% endif %}>
                         </div>
                     </div>
                 {% empty %}
-                    <p class="text-center">No notifications yet.</p>
+                    <div class="py-16 flex flex-col items-center justify-center text-center">
+                        <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">notifications_paused</span>
+                        <h3 class="text-base font-bold uppercase tracking-wide text-gray-400 mb-1">No Notifications</h3>
+                        <p class="text-xs font-mono text-gray-400">You're all caught up!</p>
+                    </div>
                 {% endfor %}
             </div>
-        </div>
-        {% if page_obj.has_next %}
-            <div class="text-center mb-4">
-                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-light">Load More</a>
-            </div>
-        {% endif %}
-        {% if not page_obj.object_list|all_is_read %}
-            <button type="submit" class="btn btn-primary w-100">Mark as Read</button>
-        {% endif %}
-    </form>
-</div>
 
-</div></div>
+            {% if page_obj.has_next %}
+                <div class="text-center mt-4">
+                    <a href="?page={{ page_obj.next_page_number }}" class="inline-flex cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-xs font-bold uppercase tracking-widest">
+                        Load Older Notifications
+                    </a>
+                </div>
+            {% endif %}
+            
+        </form>
+    </main>
+</div>
 {% endblock %}
+
 {% block scripts %}
 <script>
-    const userId = {{ user.id }};
-    const notifSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
-    const notifList = document.querySelector('.card-body');
+    const userId = {{ user.id|default:"null" }};
+    if (userId) {
+        const notifSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
+        const notifList = document.getElementById('notif-list');
 
-    notifSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        if (data.type === 'new_notification' && !data.is_read) {
-            const notifDiv = document.createElement('div');
-            notifDiv.className = 'card mb-2';
-            notifDiv.innerHTML = `
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <img src="/static/img/default_profile.png" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                        <div>
-                            <p class="mb-0"><strong>@${data.sender}</strong> ${data.type === 'comment' ? 'commented on your post' : data.type === 'follow' ? 'followed you' : 'sent you a message'}.</p>
-                            <p class="text-muted small">${new Date(data.created_at).toLocaleString()}</p>
+        notifSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'new_notification' && !data.is_read) {
+                // Remove empty state if present
+                if(notifList.querySelector('.py-16')) notifList.innerHTML = '';
+                
+                let actionText = '';
+                if(data.type === 'comment') actionText = 'commented on your post.';
+                else if(data.type === 'follow') actionText = 'started following you.';
+                else if(data.type === 'message') actionText = 'sent you a direct message.';
+                else if(data.type === 'like') actionText = 'liked your post.';
+                
+                const notifHTML = `
+                    <div class="p-4 md:p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 bg-yellow-50/50">
+                        <a href="/accounts/profile/${data.sender}/" class="w-10 h-10 rounded-full border border-black overflow-hidden shrink-0 block hover:opacity-80 transition-opacity">
+                            <img src="/static/img/default_profile.png" alt="Profile" class="w-full h-full object-cover grayscale">
+                        </a>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-black mb-1 leading-snug">
+                                <strong><a href="/accounts/profile/${data.sender}/" class="hover:underline">@${data.sender}</a></strong>
+                                <span class="text-gray-700">${actionText}</span>
+                            </p>
+                            <div class="flex items-center gap-4 mt-2">
+                                <p class="text-[10px] font-mono uppercase tracking-widest text-gray-500">Just now</p>
+                            </div>
                         </div>
-                        <input type="checkbox" name="notification_ids" value="${data.id}" class="ml-auto">
+                        <div class="shrink-0 flex items-center justify-center pt-1">
+                            <input type="checkbox" name="notification_ids" value="${data.id}" class="w-5 h-5 border-black text-black focus:ring-black rounded-none cursor-pointer">
+                        </div>
                     </div>
-                </div>
-            `;
-            notifList.prepend(notifDiv);
+                `;
+                notifList.insertAdjacentHTML('afterbegin', notifHTML);
+            }
+        };
+
+        const form = document.getElementById('notif-form');
+        if(form) {
+            form.addEventListener('submit', (e) => {
+                const formData = new FormData(e.target);
+                const notificationIds = formData.getAll('notification_ids');
+                notificationIds.forEach(id => {
+                    notifSocket.send(JSON.stringify({'type': 'mark_read', 'notification_id': id}));
+                });
+            });
         }
-    };
-
-    document.querySelector('form').addEventListener('submit', (e) => {
-        const formData = new FormData(e.target);
-        const notificationIds = formData.getAll('notification_ids');
-        notificationIds.forEach(id => {
-            notifSocket.send(JSON.stringify({'type': 'mark_read', 'notification_id': id}));
-        });
-    });
+    }
 </script>
-
-</div></div>
 {% endblock %}

@@ -10,6 +10,7 @@ urlpatterns = [
     path('add-to-cart/<int:item_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/', views.cart_view, name='cart_view'),
     path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('remove-coupon/', views.remove_coupon, name='remove_coupon'),
 
     # Checkout and payment
     path('checkout/', views.checkout, name='checkout'),
