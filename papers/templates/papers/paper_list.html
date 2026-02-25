@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Past Papers Archive - StudyPedia{% endblock %}
+
+{% block content %}
+<!-- Top Header -->
+<div class="w-full bg-black text-white py-12 border-b border-black">
+    <div class="max-w-[1440px] mx-auto w-full px-4 md:px-8">
+        <h1 class="text-4xl md:text-5xl font-light font-display uppercase tracking-tight mb-4">Solved Papers Archive</h1>
+        <p class="text-gray-400 font-light max-w-2xl text-lg">Browse our exhaustive collection of previous year solved and unsolved question papers.</p>
+    </div>
+</div>
+
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8">
+    
+    <!-- Left Sidebar: Filters -->
+    <aside class="w-full md:w-1/4 flex flex-col gap-6">
+        <div class="bg-white border border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sticky top-24">
+            <h3 class="text-xl font-display font-bold uppercase tracking-tight mb-6 border-b border-black pb-4 text-black">Filter Papers</h3>
+            
+            <form method="GET" action="{% url 'papers:paper_list' %}" class="flex flex-col gap-5">
+                <!-- Search -->
+                <div class="space-y-2">
+                    <label for="q" class="text-xs font-bold uppercase tracking-widest text-gray-500">Search Keywords</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400">search</span>
+                        <input type="text" name="q" id="q" value="{{ request.GET.q }}" placeholder="Subject name, exam..." class="w-full h-10 bg-gray-50 border border-gray-300 text-black placeholder:text-gray-400 pl-10 pr-4 focus:outline-none focus:border-black focus:bg-white transition-colors text-sm font-mono tracking-wide">
+                    </div>
+                </div>
+
+                <!-- Sort Options (Mockup UI) -->
+                <div class="space-y-2 mt-2">
+                    <label class="text-xs font-bold uppercase tracking-widest text-gray-500">Exam Type</label>
+                    <div class="flex flex-col gap-2 font-mono text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="exam_type" value="" class="text-black focus:ring-black rounded-none border-black accent-black" checked>
+                            <span class="text-gray-600 group-hover:text-black transition-colors">All Types</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="exam_type" value="mid" class="text-black focus:ring-black rounded-none border-black accent-black">
+                            <span class="text-gray-600 group-hover:text-black transition-colors">Mid-Term</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="exam_type" value="end" class="text-black focus:ring-black rounded-none border-black accent-black">
+                            <span class="text-gray-600 group-hover:text-black transition-colors">End-Term</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="mt-6 flex w-full cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-12 px-6 text-sm font-bold uppercase tracking-widest gap-2">
+                    Apply Filters <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Right Content Area: grid of papers -->
+    <main class="w-full md:w-3/4 flex flex-col gap-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-black pb-6 gap-4">
+            <div class="flex items-center gap-4">
+                <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-black text-white">{{ papers.count|default:"0" }} Results</span>
+            </div>
+            {% if user.is_staff %}
+            <a href="{% url 'papers:paper_create' %}" class="flex whitespace-nowrap cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-sm font-bold uppercase tracking-widest gap-2">
+                <span class="material-symbols-outlined text-[18px]">add</span> Upload Paper
+            </a>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+            <div class="flex flex-col gap-2 mb-4">
+                {% for message in messages %}
+                    <div class="p-3 border border-black text-xs font-bold uppercase tracking-widest {% if message.tags == 'error' %}bg-red-50 text-red-600{% elif message.tags == 'success' %}bg-green-50 text-green-600{% else %}bg-gray-50 text-black{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for paper in papers %}
+                <div class="bg-white border border-black p-5 group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
+                    
+                    {% if not paper.is_active %}
+                        <div class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                            <span class="bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-widest">Inactive</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Image / Preview -->
+                    <div class="w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
+                        {% if paper.image %}
+                            <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500">
+                        {% else %}
+                            <div class="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-300">
+                                <span class="material-symbols-outlined text-6xl">article</span>
+                            </div>
+                        {% endif %}
+                        <div class="absolute top-2 left-2 bg-black border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">history_edu</span> Paper
+                        </div>
+                        <div class="absolute top-2 right-2 bg-white border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-black flex items-center gap-1">
+                            {{ paper.year|default:"N/A" }}
+                        </div>
+                    </div>
+
+                    <!-- Meta details -->
+                    <div class="flex flex-col flex-grow">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-lg font-display font-bold uppercase tracking-tight text-black line-clamp-2" title="{{ paper.name }}">{{ paper.name }}</h3>
+                        </div>
+                        <p class="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-2 truncate" title="Code: {{ paper.code }}">Code: {{ paper.code }} &bull; {{ paper.get_exam_type_display }}</p>
+                        
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-4 mt-2">
+                            <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-gray-300 bg-gray-50 text-gray-600">{{ paper.branch.degree.university.name|default:"University" }}</span>
+                            <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-gray-300 bg-gray-50 text-gray-600">{{ paper.branch.name|default:"Branch" }}</span>
+                        </div>
+                        
+                        <!-- Pricing and Action -->
+                        <div class="mt-auto pt-4 border-t border-black/10 flex items-end justify-between relative z-10">
+                            <div class="flex flex-col">
+                                <span class="text-lg font-bold text-black leading-none">₹{{ paper.price }}</span>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-400 mt-1">{{ paper.credit_price }} Credits</span>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                {% if user.is_staff %}
+                                    <!-- Admin Actions Dropdown -->
+                                    <div class="relative group/menu">
+                                        <button class="w-10 h-10 bg-gray-100 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">more_vert</span>
+                                        </button>
+                                        <div class="absolute right-0 bottom-full mb-2 w-32 bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-opacity z-30 flex flex-col">
+                                            <a href="{% url 'papers:paper_update' paper.pk %}" class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black hover:bg-gray-100 border-b border-black">Edit</a>
+                                            <a href="{% url 'papers:paper_delete' paper.pk %}" class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-red-600 hover:bg-red-50 text-left" onclick="return confirm('Are you sure you want to delete this paper?');">Delete</a>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <a href="{% url 'ecommerce:add_to_cart' paper.pk %}?type=paper" class="w-10 h-10 bg-black text-white border border-black flex items-center justify-center hover:bg-white hover:text-black transition-colors tooltip-target" title="Add to Cart">
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            {% empty %}
+                <div class="col-span-full py-20 flex flex-col items-center justify-center bg-gray-50 border border-black text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">search_off</span>
+                    <h3 class="text-xl font-display font-light uppercase tracking-tight text-black mb-2">No Papers Found</h3>
+                    <p class="text-sm font-light text-gray-500 max-w-sm">We couldn't find any past papers matching your criteria. Try adjusting your filters or search terms.</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+    </main>
+
+</div>
+{% endblock %}

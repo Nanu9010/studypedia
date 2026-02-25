@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Chat with @{{ other_user.username }} - StudyPedia{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Chat with @{{ other_user.username }}</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <a href="{% url 'videocall:create_private_room' other_user.username %}" class="btn btn-success">Start Video Call</a>
+        </div>
+    </div>
+
+    <div class="chat-log" id="chat-log">
+        {% for message in messages %}
+            <div class="message">
+                <strong>@{{ message.user.username }}</strong>: {{ message.content }}
+                <small>{{ message.created_at|date:"F d, Y H:i" }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <form id="message-form" method="post" action="{% url 'social:send_message' room.id %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extrac_js %}
+<script>
+    const roomId = {{ room.id }};
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomId}/`);
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'message') {
+            const chatLog = document.querySelector('#chat-log');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `<strong>@${data.user}</strong>: ${data.content} <small>${data.timestamp}</small>`;
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    };
+    document.querySelector('#message-form').onsubmit = function(e) {
+        e.preventDefault();
+        const messageInput = document.querySelector('#id_content');
+        chatSocket.send(JSON.stringify({
+            'type': 'message',
+            'content': messageInput.value
+        }));
+        messageInput.value = '';
+    };
+</script>
+{% endblock %}

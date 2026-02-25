@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Create Post - StudyPedia
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container">
+    <h1 class="text-black tracking-tight text-3xl md:text-5xl font-light font-display uppercase mb-6" >Create Post</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Create Post</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</div></div>
+{% endblock %}

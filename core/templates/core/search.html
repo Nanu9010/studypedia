@@ -1,0 +1,69 @@
+<!-- core/templates/core/search.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+  <div class="container">
+    <h1 class="text-black tracking-tight text-3xl md:text-5xl font-light font-display uppercase mb-6" >Advanced Search</h1>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <form method="get" class="form-group">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search...">
+      <select name="university">
+        <option value="">All Universities</option>
+        {% for uni in universities %}
+          <option value="{{ uni.pk }}" {% if university == uni.pk|stringformat:"s" %}selected{% endif %}>{{ uni.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="subject">
+        <option value="">All Subjects</option>
+        {% for sub in subjects %}
+          <option value="{{ sub.pk }}" {% if subject == sub.pk|stringformat:"s" %}selected{% endif %}>{{ sub.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="year" value="{{ year }}" placeholder="Year">
+      <input type="number" name="price_min" value="{{ price_min }}" placeholder="Min Price">
+      <input type="number" name="price_max" value="{{ price_max }}" placeholder="Max Price">
+      <select name="sort">
+        <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price Asc</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price Desc</option>
+        <option value="year_asc" {% if sort == 'year_asc' %}selected{% endif %}>Year Asc</option>
+        <option value="year_desc" {% if sort == 'year_desc' %}selected{% endif %}>Year Desc</option>
+      </select>
+      <select name="view">
+        <option value="grid" {% if view == 'grid' %}selected{% endif %}>Grid</option>
+        <option value="list" {% if view == 'list' %}selected{% endif %}>List</option>
+      </select>
+      <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Search</button>
+    </form>
+    <div class="grid {% if view == 'grid' %}grid-3{% else %}grid-1{% endif %}">
+      {% for note in notes %}
+        <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+          <h3>{{ note.subject.name }} - Note</h3>
+          <p><strong>Exam Type:</strong> {{ note.get_exam_type_display }}</p>
+          <p><strong>Year:</strong> {{ note.year }}</p>
+          <p><strong>Price:</strong> ${{ note.price }}</p>
+          <a href="{% url 'ecommerce:add_to_cart' note.pk %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Add to Cart</a>
+        </div>
+      {% endfor %}
+      {% for paper in papers %}
+        <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+          <h3>{{ paper.subject.name }} - Paper</h3>
+          <p><strong>Exam Type:</strong> {{ paper.get_exam_type_display }}</p>
+          <p><strong>Year:</strong> {{ paper.year }}</p>
+          <p><strong>Price:</strong> ${{ paper.price }}</p>
+          <a href="{% url 'ecommerce:add_to_cart' paper.pk %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Add to Cart</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div></div>
+{% endblock %}

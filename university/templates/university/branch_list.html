@@ -1,0 +1,38 @@
+<!-- university/templates/university/branch_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+  <div class="container">
+    <h1 class="text-black tracking-tight text-3xl md:text-5xl font-light font-display uppercase mb-6" >Branches</h1>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if user.is_staff %}
+      <a href="{% url 'university:branch_create' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Create Branch</a>
+    {% endif %}
+    <div class="grid grid-3">
+      {% for branch in branches %}
+        <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+          <h3>{{ branch.name }} {{ branch.degree.university.name }}</h3>
+          <p><strong>Abbreviation:</strong> {{ branch.abbreviation }} </p>
+          <p><strong>Degree:</strong> {{ branch.degree.name }} {{ branch.degree.university.name }} </p>
+          <p><strong>Active:</strong> {{ branch.is_active|yesno:"Yes,No" }}</p>
+          {% if user.is_staff %}
+            <a href="{% url 'university:branch_update' branch.pk %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Edit</a>
+            <a href="{% url 'university:branch_delete' branch.pk %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide" onclick="return confirm('Are you sure you want to delete {{ branch.name }}?');">Delete</a>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>No branches found.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div></div>
+{% endblock %}

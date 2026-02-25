@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main class="flex-1 flex flex-col md:flex-row max-w-[1440px] mx-auto w-full bg-white h-[calc(100vh-73px)] overflow-hidden">
+<aside class="w-full md:w-64 flex-shrink-0 p-6 border-r border-black overflow-y-auto bg-white hidden md:block">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-base font-bold text-black uppercase tracking-wider">A/V Settings</h3>
+</div>
+<div class="space-y-8">
+<div>
+<h4 class="text-xs font-bold text-black mb-4 uppercase tracking-widest border-b border-gray-200 pb-2">Camera</h4>
+<div class="space-y-4">
+<div class="relative w-full">
+<select class="w-full bg-white border border-black text-black text-xs font-mono uppercase focus:ring-0 focus:border-black p-2 pr-8 appearance-none cursor-pointer">
+<option>FaceTime HD Camera</option>
+<option>External Webcam Pro</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-black">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="size-4 border border-black rounded-none bg-white text-black focus:ring-0 focus:ring-offset-0 checked:bg-black checked:border-black" type="checkbox"/>
+<span class="text-xs font-bold uppercase text-gray-800 group-hover:text-black">Mirror Video</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="size-4 border border-black rounded-none bg-white text-black focus:ring-0 focus:ring-offset-0 checked:bg-black checked:border-black" type="checkbox"/>
+<span class="text-xs font-bold uppercase text-gray-800 group-hover:text-black">Blur Background</span>
+</label>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold text-black mb-4 uppercase tracking-widest border-b border-gray-200 pb-2">Microphone</h4>
+<div class="space-y-4">
+<div class="relative w-full">
+<select class="w-full bg-white border border-black text-black text-xs font-mono uppercase focus:ring-0 focus:border-black p-2 pr-8 appearance-none cursor-pointer">
+<option>Default - MacBook Pro Mic</option>
+<option>USB Microphone</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-black">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+<div class="w-full flex items-center gap-3">
+<span class="material-symbols-outlined text-black text-base">mic</span>
+<div class="flex-1 h-1 bg-gray-100 relative">
+<div class="absolute top-0 left-0 h-full w-2/3 bg-black"></div>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold text-black mb-4 uppercase tracking-widest border-b border-gray-200 pb-2">Speakers</h4>
+<div class="space-y-4">
+<div class="relative w-full">
+<select class="w-full bg-white border border-black text-black text-xs font-mono uppercase focus:ring-0 focus:border-black p-2 pr-8 appearance-none cursor-pointer">
+<option>System Default</option>
+<option>Headphones (Wired)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-black">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+<button class="text-xs font-bold text-black uppercase hover:underline flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">volume_up</span> Test Audio
+                        </button>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0 bg-white relative">
+<div class="px-8 py-6 border-b border-black flex items-center justify-between">
+<div>
+<h1 class="text-black tracking-tight text-3xl font-light font-display uppercase">Video Lobby</h1>
+<p class="text-gray-600 text-xs font-mono uppercase tracking-wide mt-1">Ready to connect with peers?</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+<span class="text-xs font-bold uppercase tracking-widest">System Online</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50 relative">
+<div class="w-full max-w-4xl aspect-video bg-black relative border border-black shadow-none group">
+<img alt="User webcam preview" class="w-full h-full object-cover grayscale opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1Q1gz-Q2wNeg4lj6MwvRyENqnO5k8lvlVFQ1Rfnhni97jFdkAS1cpZ7Y6xOFL-aoZwJlP_9tN4qwWWXMGOJnqPqxxLATFZcJBDOVPBKW28cmaCorcyV34nwj3lPthEGM8QL64EqGqe-Rd0Z8cTaprfc4JJGzMFeCg_sE-zFOeGKSZ_ytX3XuBtQtKJ_ujFgwqbLz9nrh2bwnypo0ihhiGgpNRoJZlAFcFaYNBoIE5fU25_uV1Sjtu6yqYYCL5uHf_vDaGWo5QHNBI"/>
+<div class="absolute inset-0 flex flex-col justify-between p-6">
+<div class="flex justify-between items-start">
+<span class="bg-black text-white px-2 py-1 text-[10px] font-mono uppercase tracking-wider">REC</span>
+<div class="flex gap-2">
+<div class="bg-black/80 backdrop-blur-sm text-white px-3 py-1 text-xs font-mono">
+                                    1280x720 • 30fps
+                                </div>
+</div>
+</div>
+<div class="flex justify-center mb-2">
+<div class="bg-white border border-black px-6 py-3 flex gap-6 shadow-sm">
+<button class="group flex flex-col items-center gap-1 hover:text-gray-600 transition-colors">
+<span class="material-symbols-outlined text-2xl">mic_off</span>
+</button>
+<button class="group flex flex-col items-center gap-1 hover:text-gray-600 transition-colors">
+<span class="material-symbols-outlined text-2xl">videocam_off</span>
+</button>
+<button class="group flex flex-col items-center gap-1 hover:text-gray-600 transition-colors">
+<span class="material-symbols-outlined text-2xl">present_to_all</span>
+</button>
+<button class="group flex flex-col items-center gap-1 hover:text-gray-600 transition-colors">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</button>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px]"></div>
+</div>
+</div>
+<div class="h-64 border-t border-black bg-white grid grid-cols-1 md:grid-cols-2">
+<div class="group relative border-b md:border-b-0 md:border-r border-black p-8 hover:bg-gray-50 transition-colors cursor-pointer flex flex-col justify-center items-center text-center">
+<div class="mb-4 p-4 border border-black rounded-full group-hover:bg-black group-hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined text-4xl">shuffle</span>
+</div>
+<h3 class="text-xl font-bold uppercase tracking-widest text-black mb-2">Find Random Peer</h3>
+<p class="text-gray-500 text-sm font-light max-w-xs mx-auto mb-6">Connect with a random student from any university for a quick study session or chat.</p>
+<div class="flex gap-2 justify-center">
+<span class="px-2 py-1 border border-gray-300 text-[10px] uppercase tracking-wide text-gray-500">Global</span>
+<span class="px-2 py-1 border border-gray-300 text-[10px] uppercase tracking-wide text-gray-500">Any Major</span>
+</div>
+<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+<div class="group relative p-8 hover:bg-gray-50 transition-colors cursor-pointer flex flex-col justify-center items-center text-center">
+<div class="mb-4 p-4 border border-black rounded-full group-hover:bg-black group-hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined text-4xl">lock</span>
+</div>
+<h3 class="text-xl font-bold uppercase tracking-widest text-black mb-2">Create Private Room</h3>
+<p class="text-gray-500 text-sm font-light max-w-xs mx-auto mb-6">Start a secure, invite-only session for your study group or project team.</p>
+<div class="flex gap-2 justify-center">
+<span class="px-2 py-1 border border-gray-300 text-[10px] uppercase tracking-wide text-gray-500">Encrypted</span>
+<span class="px-2 py-1 border border-gray-300 text-[10px] uppercase tracking-wide text-gray-500">Shareable Link</span>
+</div>
+<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+{% endblock %}

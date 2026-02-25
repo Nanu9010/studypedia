@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Social Feed - StudyPedia
+</div></div>
+{% endblock %}
+{% load static %}
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container">
+    <h1 class="text-center mb-4">Social Feed</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+<!--    <form method="get" class="mb-4">-->
+<!--        <div class="input-group">-->
+<!--            <input type="text" name="q" class="w-full h-12 bg-transparent border-b border-gray-300 text-black placeholder:text-gray-400 px-4 focus:outline-none focus:border-black transition-colors text-sm font-mono tracking-wide" placeholder="Search posts or users..." value="{{ search_query|default:'' }}">-->
+<!--            <button class="flex cursor-pointer items-center justify-center border border-gray-300 hover:border-black hover:bg-gray-50 text-black transition-colors h-10 px-4 text-xs font-bold uppercase tracking-wide w-full" type="submit">🔍</button>-->
+<!--        </div>-->
+<!--    </form>-->
+
+    <div class="post-grid" id="post-list">
+        {% for post in page_obj %}
+            <div class="post-item card mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        {% if post.user.profile_picture %}
+                            <img src="{{ post.user.profile_picture.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'img/default_profile.png' %}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% endif %}
+                        <h5 class="mb-0"><a href="{% url 'accounts:profile' post.user.username %}">@{{ post.user.username }}</a></h5>
+
+                    </div>
+                    <p class="mt-2">{{ post.content|truncatechars:100 }}</p>
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post Image" class="post-image" loading="lazy">
+                    {% endif %}
+                    <p class="text-muted small mt-1">{{ post.created_at|date:"F d, Y H:i" }}</p>
+                    <div class="actions d-flex mt-2">
+                        <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-info">Comments</a>
+                        {% if post.user == user %}
+                            <a href="{% url 'social:edit_post' post.pk %}" class="btn btn-sm btn-primary ml-2">Edit</a>
+                            <a href="{% url 'social:delete_post' post.pk %}" class="btn btn-sm btn-danger ml-2">Delete</a>
+                        {% else %}
+                            <a href="{% url 'messenger:start_chat' post.user.username %}" class="btn btn-sm btn-info ml-2">Chat</a>
+                            <a href="{% url 'videocall:create_private_room' post.user.username %}" class="btn btn-sm btn-success ml-2">Video Call</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">No posts found. {% if search_query %}Try a different search.{% else %}Follow users to see their posts!{% endif %}</p>
+        {% endfor %}
+    </div>
+</div>
+
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/social/`);
+    const postList = document.getElementById('post-list');
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'new_post') {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post-item card mb-3';
+            postDiv.innerHTML = `
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <img src="${data.image || '/static/img/default_profile.png'}" alt="Profile" class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <h5 class="mb-0"><a href="/accounts/profile/${data.username}/">@${data.username}</a></h5>
+                        <form action="/social/post/${data.post_id}/like/" method="post" class="ml-auto">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Like</button>
+                        </form>
+                    </div>
+                    <p class="mt-2">${data.content}</p>
+                    ${data.image ? `<img src="${data.image}" alt="Post Image" class="post-image" loading="lazy">` : ''}
+                    <p class="text-muted small mt-1">${new Date(data.created_at).toLocaleString()}</p>
+                    <div class="actions d-flex mt-2">
+                        <a href="/social/post/${data.post_id}/" class="btn btn-sm btn-info">Comments</a>
+                        <a href="/messenger/start/${data.username}/" class="btn btn-sm btn-info ml-2">Chat</a>
+                        <a href="/videocall/create_private_room/${data.username}/" class="btn btn-sm btn-success ml-2">Video Call</a>
+                    </div>
+                </div>
+            `;
+            postList.prepend(postDiv);
+        } else if (data.type === 'new_comment') {
+            // Update post detail (requires client-side logic or redirect)
+            console.log('New comment on post:', data.post_id);
+            // Optionally fetch post_detail and update DOM
+        }
+    };
+
+    let page = {% if page_obj.has_next %}{{ page_obj.next_page_number }}{% else %}null{% endif %};
+    let loading = false;
+    window.addEventListener('scroll', () => {
+        if (!page) return;
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 && !loading) {
+            loading = true;
+            const searchQuery = "{{ search_query|escapejs }}";
+            const url = `?page=${page}${searchQuery ? '&q=' + encodeURIComponent(searchQuery) : ''}`;
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newPosts = doc.querySelector('#post-list').innerHTML;
+                    if (newPosts) {
+                        document.querySelector('#post-list').insertAdjacentHTML('beforeend', newPosts);
+                        page++;
+                    }
+                    loading = false;
+                })
+                .catch(() => loading = false);
+        }
+    });
+</script>
+
+</div></div>
+{% endblock %}

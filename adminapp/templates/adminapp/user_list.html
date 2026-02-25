@@ -1,0 +1,152 @@
+<!-- templates/adminapp/user_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Users Management
+</div></div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1 class="text-black tracking-tight text-3xl md:text-5xl font-light font-display uppercase mb-6" >Users Management</h1>
+            <p style="color: #666;">Manage all registered users and their permissions</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card">
+            <div class="stat-number">{{ users.count }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ users|length|add:"-staff_count" }}</div>
+            <div class="stat-label">Regular Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ staff_count|default:0 }}</div>
+            <div class="stat-label">Staff Members</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ recent_signups|default:0 }}</div>
+            <div class="stat-label">This Week</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get">
+            <div class="grid">
+                <input type="text" name="search" placeholder="Search users..." value="{{ request.GET.search }}">
+                <select name="is_staff">
+                    <option value="">All Users</option>
+                    <option value="true" {% if request.GET.is_staff == 'true' %}selected{% endif %}>Staff Only</option>
+                    <option value="false" {% if request.GET.is_staff == 'false' %}selected{% endif %}>Regular Users</option>
+                </select>
+                <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Credits</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ user.username }}</strong>
+                                {% if user.first_name or user.last_name %}
+                                    <br><small style="color: #666;">{{ user.first_name }} {{ user.last_name }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.is_staff %}
+                            <span class="status-badge" style="background: #fbbf24; color: #92400e;">Staff</span>
+                        {% elif user.is_superuser %}
+                            <span class="status-badge" style="background: #dc2626; color: white;">Admin</span>
+                        {% else %}
+                            <span class="status-badge" style="background: #d1fae5; color: #065f46;">User</span>
+                        {% endif %}
+
+                        {% if not user.is_active %}
+                            <span class="status-badge" style="background: #fecaca; color: #b91c1c;">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.credits|default:0 }} credits</td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        {% if user.last_login %}
+                            {{ user.last_login|timesince }} ago
+                        {% else %}
+                            <span style="color: #666;">Never</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if not user.is_superuser %}
+                                <a href="{% url 'adminapp:toggle_staff' user.pk %}"
+                                   class="btn {% if user.is_staff %}btn-warning{% else %}btn-success{% endif %} btn-sm">
+                                    {% if user.is_staff %}Revoke Staff{% else %}Grant Staff{% endif %}
+                                </a>
+                            {% endif %}
+
+                            <button class="btn btn-secondary btn-sm" onclick="viewUserDetails({{ user.id }})">
+                                View
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #666; padding: 2rem;">No users found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if users.has_other_pages %}
+    <div class="pagination">
+        {% if users.has_previous %}
+            <a href="?page={{ users.previous_page_number }}" class="btn btn-secondary btn-sm">Previous</a>
+        {% endif %}
+        <span class="btn btn-primary btn-sm">Page {{ users.number }} of {{ users.paginator.num_pages }}</span>
+        {% if users.has_next %}
+            <a href="?page={{ users.next_page_number }}" class="btn btn-secondary btn-sm">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function viewUserDetails(userId) {
+    // Implement user details modal
+    alert('User details for ID: ' + userId);
+}
+</script>
+
+</div></div>
+{% endblock %}

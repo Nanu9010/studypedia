@@ -1,0 +1,248 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>{% block title %}StudentHub - Educational Resources{% endblock %}</title>-->
+<!--    <style>-->
+<!--        /* Minimalist Black & White Theme */-->
+<!--        :root {-->
+<!--            &#45;&#45;bg-color: #ffffff;-->
+<!--            &#45;&#45;text-color: #000000;-->
+<!--            &#45;&#45;border-color: #e0e0e0;-->
+<!--            &#45;&#45;hover-color: #f5f5f5;-->
+<!--            &#45;&#45;accent-color: #333333;-->
+<!--            &#45;&#45;shadow: 0 2px 4px rgba(0,0,0,0.1);-->
+<!--        }-->
+
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            background: var(&#45;&#45;bg-color);-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            line-height: 1.6;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1200px;-->
+<!--            margin: 0 auto;-->
+<!--            padding: 0 20px;-->
+<!--        }-->
+
+<!--        /* Header */-->
+<!--        header {-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--            padding: 1rem 0;-->
+<!--            position: sticky;-->
+<!--            top: 0;-->
+<!--            background: var(&#45;&#45;bg-color);-->
+<!--            z-index: 100;-->
+<!--        }-->
+
+<!--        nav {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .logo {-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 700;-->
+<!--            text-decoration: none;-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--        }-->
+
+<!--        .nav-links {-->
+<!--            display: flex;-->
+<!--            list-style: none;-->
+<!--            gap: 2rem;-->
+<!--        }-->
+
+<!--        .nav-links a {-->
+<!--            text-decoration: none;-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            font-weight: 500;-->
+<!--            transition: color 0.2s;-->
+<!--        }-->
+
+<!--        .nav-links a:hover {-->
+<!--            color: var(&#45;&#45;accent-color);-->
+<!--        }-->
+
+<!--        /* Buttons */-->
+<!--        .btn {-->
+<!--            display: inline-block;-->
+<!--            padding: 8px 16px;-->
+<!--            border: none;-->
+<!--            border-radius: 6px;-->
+<!--            text-decoration: none;-->
+<!--            font-weight: 500;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.2s;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            background: var(&#45;&#45;text-color);-->
+<!--            color: var(&#45;&#45;bg-color);-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background: var(&#45;&#45;accent-color);-->
+<!--        }-->
+
+<!--        .btn-secondary {-->
+<!--            background: transparent;-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            border: 1px solid var(&#45;&#45;border-color);-->
+<!--        }-->
+
+<!--        .btn-secondary:hover {-->
+<!--            background: var(&#45;&#45;hover-color);-->
+<!--        }-->
+
+<!--        /* Cards */-->
+<!--        .card {-->
+<!--            border: 1px solid var(&#45;&#45;border-color);-->
+<!--            border-radius: 8px;-->
+<!--            padding: 1.5rem;-->
+<!--            background: var(&#45;&#45;bg-color);-->
+<!--            box-shadow: var(&#45;&#45;shadow);-->
+<!--            transition: transform 0.2s;-->
+<!--        }-->
+
+<!--        .card:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--        }-->
+
+<!--        /* Grid Layout */-->
+<!--        .grid {-->
+<!--            display: grid;-->
+<!--            gap: 2rem;-->
+<!--        }-->
+
+<!--        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }-->
+<!--        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }-->
+<!--        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }-->
+
+<!--        /* Forms */-->
+<!--        .form-group {-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        label {-->
+<!--            display: block;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        input, select, textarea {-->
+<!--            width: 100%;-->
+<!--            padding: 8px 12px;-->
+<!--            border: 1px solid var(&#45;&#45;border-color);-->
+<!--            border-radius: 4px;-->
+<!--            font-size: 1rem;-->
+<!--        }-->
+
+<!--        input:focus, select:focus, textarea:focus {-->
+<!--            outline: none;-->
+<!--            border-color: var(&#45;&#45;accent-color);-->
+<!--        }-->
+
+<!--        /* Messages */-->
+<!--        .messages {-->
+<!--            margin: 1rem 0;-->
+<!--        }-->
+
+<!--        .message {-->
+<!--            padding: 1rem;-->
+<!--            border-radius: 4px;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--        }-->
+
+<!--        .message.success {-->
+<!--            background: #f0f9ff;-->
+<!--            border-left: 4px solid #10b981;-->
+<!--        }-->
+
+<!--        .message.error {-->
+<!--            background: #fef2f2;-->
+<!--            border-left: 4px solid #ef4444;-->
+<!--        }-->
+
+<!--        /* Responsive */-->
+<!--        @media (max-width: 768px) {-->
+<!--            .nav-links {-->
+<!--                display: none;-->
+<!--            }-->
+
+<!--            .grid-2, .grid-3, .grid-4 {-->
+<!--                grid-template-columns: 1fr;-->
+<!--            }-->
+
+<!--            .container {-->
+<!--                padding: 0 15px;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <header>-->
+<!--        <div class="container">-->
+<!--            <nav>-->
+<!--                <a href="{% url 'core:home' %}" class="logo">StudentHub</a>-->
+
+<!--                <ul class="nav-links">-->
+<!--                    <li><a href="{% url 'notes:list' %}">Notes & Papers</a></li>-->
+<!--                    <li><a href="{% url 'roadmaps:list' %}">Roadmaps</a></li>-->
+
+<!--                    <li><a href="{% url 'twitter:home_feed' %}">Twitter</a></li>-->
+
+<!--                    <li><a href="{% url 'videocall:lobby' %}">Video Call</a></li>-->
+<!--                    {% if user.is_authenticated %}-->
+<!--                        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>-->
+<!--                        {% if user.is_staff %}-->
+<!--                            <li><a href="{% url 'adminapp:dashboard' %}">Admin</a></li>-->
+<!--                        {% endif %}-->
+<!--                        <li>-->
+<!--                            <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">-->
+<!--                                {% csrf_token %}-->
+<!--                                <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0; font: inherit; text-decoration: underline;">Logout</button>-->
+<!--                            </form>-->
+<!--                        </li>-->
+<!--                    {% else %}-->
+<!--                        <li><a href="{% url 'accounts:login' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Login</a></li>-->
+<!--                        <li><a href="{% url 'accounts:signup' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Sign Up</a></li>-->
+<!--                    {% endif %}-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--        </div>-->
+<!--    </header>-->
+
+<!--    <main>-->
+<!--        {% if messages %}-->
+<!--            <div class="container">-->
+<!--                <div class="messages">-->
+<!--                    {% for message in messages %}-->
+<!--                        <div class="message {{ message.tags }}">{{ message }}</div>-->
+<!--                    {% endfor %}-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        {% endif %}-->
+
+<!--        {% block content %}{% endblock %}-->
+<!--    </main>-->
+
+<!--    <footer style="border-top: 1px solid var(&#45;&#45;border-color); margin-top: 4rem; padding: 2rem 0; text-align: center; color: #666;">-->
+<!--        <div class="container">-->
+<!--            <p>&copy; 2025 StudentHub. Made with ❤️ for students.</p>-->
+<!--        </div>-->
+<!--    </footer>-->
+
+<!--    {% block scripts %}{% endblock %}-->
+<!--</body>-->
+<!--</html>-->

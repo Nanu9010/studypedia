@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - StudentHub
+</div></div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container" style="padding: 2rem 0;">
+    <div style="max-width: 400px; margin: 0 auto;">
+        <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Login to StudentHub</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="message error">
+                        Please enter a correct username and password. Note that both fields may be case-sensitive.
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    <input type="text" name="username" id="id_username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    <input type="password" name="password" id="id_password" required>
+                </div>
+
+                <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide" style="width: 100%; margin-bottom: 1rem;">Login</button>
+
+                <div style="text-align: center;">
+                    <p style="color: #666;">Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</div></div>
+{% endblock %}

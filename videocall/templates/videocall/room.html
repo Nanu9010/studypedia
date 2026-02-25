@@ -1,0 +1,840 @@
+<!-- videocall/templates/videocall/room.html -->
+{% extends 'base.html' %}
+
+{% block title %}Video Chat Room - {{ room.name }}
+</div></div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="video-chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="room-info">
+            <h3>{{ room.name }}</h3>
+            <span class="status-indicator status-{{ room.status }}">{{ room.get_status_display }}</span>
+        </div>
+        <div class="chat-controls">
+            <button id="toggleVideo" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide" title="Toggle Video">
+                <i class="fas fa-video"></i>
+            </button>
+            <button id="toggleAudio" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide" title="Toggle Audio">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button id="shareScreen" class="btn btn-info" title="Share Screen">
+                <i class="fas fa-desktop"></i>
+            </button>
+            <button id="skipChat" class="btn btn-warning" title="Skip to Next">
+                <i class="fas fa-forward"></i> Skip
+            </button>
+            <button id="endChat" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-red-600 hover:bg-red-600 hover:text-white text-red-600 transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide" title="End Chat">
+                <i class="fas fa-times"></i> End
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Area -->
+    <div class="video-container">
+        <div class="video-wrapper local-video-wrapper">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <div class="video-label">You</div>
+            <div class="video-controls">
+                <button id="localVideoToggle" class="video-control-btn">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button id="localAudioToggle" class="video-control-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="video-wrapper remote-video-wrapper">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div class="video-label" id="remoteUserLabel">
+                {% if room.status == 'waiting' %}
+                    Waiting for someone to join...
+                {% else %}
+                    Stranger
+                {% endif %}
+            </div>
+            <div id="connectionStatus" class="connection-status">
+                <i class="fas fa-circle-notch fa-spin"></i> Connecting...
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+        <div class="chat-messages" id="chatMessages">
+            {% for message in messages %}
+            <div class="message {% if message.user == user %}own-message{% endif %}">
+                <div class="message-content">
+                    <strong>{% if message.user == user %}You{% else %}Stranger{% endif %}:</strong>
+                    {{ message.message }}
+                </div>
+                <div class="message-time">{{ message.timestamp|time:"H:i" }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <span>Stranger is typing</span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="input-group">
+                <input type="text" id="chatInput" class="w-full h-12 bg-transparent border-b border-gray-300 text-black placeholder:text-gray-400 px-4 focus:outline-none focus:border-black transition-colors text-sm font-mono tracking-wide"
+                       placeholder="Type a message..." maxlength="500">
+                <button class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide" id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h5>Finding your chat partner...</h5>
+                <p>Please wait while we connect you with someone new.</p>
+                <button type="button" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide" onclick="window.location.href='{% url "videocall:lobby" %}'">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.video-chat-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    color: white;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #2d2d2d;
+    border-bottom: 1px solid #444;
+}
+
+.status-indicator {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-waiting { background: #ffc107; color: #000; }
+.status-active { background: #28a745; }
+.status-ended { background: #dc3545; }
+
+.video-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: 0;
+}
+
+.video-wrapper {
+    position: relative;
+    background: #333;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-label {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.video-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.video-control-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.video-control-btn:hover {
+    background: rgba(0,0,0,0.9);
+}
+
+.video-control-btn.muted {
+    background: #dc3545;
+}
+
+.connection-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.chat-panel {
+    height: 200px;
+    background: #2d2d2d;
+    border-top: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message {
+    max-width: 80%;
+    align-self: flex-start;
+}
+
+.message.own-message {
+    align-self: flex-end;
+}
+
+.message-content {
+    background: #444;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.own-message .message-content {
+    background: #007bff;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 0.25rem;
+    text-align: right;
+}
+
+.typing-indicator {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 0.2rem;
+}
+
+.typing-dots span {
+    width: 4px;
+    height: 4px;
+    background: #888;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+
+.chat-input-container {
+    padding: 1rem;
+    border-top: 1px solid #444;
+}
+
+@media (max-width: 768px) {
+    .video-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .chat-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-controls {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<script>
+const roomId = '{{ room.id }}';
+const currentUserId = {{ user.id }};
+const socket = new WebSocket('ws://127.0.0.1:8000/ws/videocall/' + roomId + '/');
+
+// WebRTC Configuration
+const configuration = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        // Add TURN servers for production
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        }
+    ]
+};
+
+// Global variables
+let localVideo = document.getElementById('localVideo');
+let remoteVideo = document.getElementById('remoteVideo');
+let localStream;
+let remoteStream;
+let peerConnection;
+let isVideoEnabled = true;
+let isAudioEnabled = true;
+let typingTimer;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMedia();
+    initializeEventListeners();
+});
+
+// Initialize user media
+async function initializeMedia() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 },
+            audio: true
+        });
+        localVideo.srcObject = localStream;
+        updateConnectionStatus('Camera ready', 'success');
+    } catch (error) {
+        console.error('Error accessing media devices:', error);
+        updateConnectionStatus('Camera access denied', 'error');
+
+        // Try audio only
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            updateConnectionStatus('Audio only mode', 'warning');
+        } catch (audioError) {
+            updateConnectionStatus('No media access', 'error');
+        }
+    }
+}
+
+// Create peer connection
+function createPeerConnection() {
+    peerConnection = new RTCPeerConnection(configuration);
+
+    // Add local stream
+    if (localStream) {
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+    }
+
+    peerConnection.onicecandidate = (event) => {
+    if (event.candidate) {
+        socket.send(JSON.stringify({
+            type: 'ice_candidate',
+            candidate: event.candidate
+        }));
+    }
+};
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.send(JSON.stringify({
+                type: 'ice_candidate',
+                candidate: event.candidate
+            }));
+        }
+    };
+
+    // Handle connection state changes
+    peerConnection.onconnectionstatechange = () => {
+        const state = peerConnection.connectionState;
+        console.log('Connection state:', state);
+
+        if (state === 'failed' || state === 'disconnected') {
+            updateConnectionStatus('Connection lost', 'error');
+        } else if (state === 'connecting') {
+            updateConnectionStatus('Connecting...', 'info');
+        }
+    };
+}
+
+// WebSocket message handling
+socket.onmessage = async function(event) {
+    try {
+        const data = JSON.parse(event.data);
+
+        switch(data.type) {
+            case 'offer':
+                await handleOffer(data.offer);
+                break;
+            case 'answer':
+                await handleAnswer(data.answer);
+                break;
+            case 'ice_candidate':
+                await handleIceCandidate(data.candidate);
+                break;
+            case 'user_joined':
+                handleUserJoined(data);
+                break;
+            case 'user_left':
+                handleUserLeft(data);
+                break;
+            case 'chat_message':
+                handleChatMessage(data);
+                break;
+            case 'partner_skipped':
+                handlePartnerSkipped(data);
+                break;
+            case 'typing_indicator':
+                handleTypingIndicator(data);
+                break;
+            case 'room_info':
+                handleRoomInfo(data.room);
+                break;
+        }
+    } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+    }
+};
+
+socket.onopen = function() {
+    console.log('WebSocket connected');
+    updateConnectionStatus('Connected to server', 'success');
+};
+
+socket.onclose = function() {
+    console.log('WebSocket disconnected');
+    updateConnectionStatus('Disconnected from server', 'error');
+};
+
+// WebRTC signaling handlers
+async function handleOffer(offer) {
+    createPeerConnection();
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    socket.send(JSON.stringify({
+        type: 'answer',
+        answer: answer
+    }));
+}
+
+async function handleAnswer(answer) {
+    if (peerConnection) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+}
+
+async function handleIceCandidate(candidate) {
+    if (peerConnection) {
+        try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+            console.error('Error adding ICE candidate:', error);
+        }
+    }
+}
+
+// Event handlers
+function handleUserJoined(data) {
+    if (data.user_id !== currentUserId) {
+        updateConnectionStatus('Partner joined', 'success');
+        document.getElementById('remoteUserLabel').textContent = 'Stranger';
+
+        // Start call automatically
+        setTimeout(startCall, 1000);
+    }
+}
+
+function handleUserLeft(data) {
+    if (data.user_id !== currentUserId) {
+        updateConnectionStatus('Partner left', 'warning');
+        document.getElementById('remoteUserLabel').textContent = 'Waiting for someone to join...';
+
+        // Clean up peer connection
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+        remoteVideo.srcObject = null;
+    }
+}
+
+function handleChatMessage(data) {
+    if (data.user_id !== currentUserId) {
+        addMessageToChat(data.message, 'Stranger', data.timestamp);
+
+        // Hide typing indicator
+        document.getElementById('typingIndicator').style.display = 'none';
+    }
+}
+
+function handlePartnerSkipped(data) {
+    showNotification('Your chat partner moved on to the next conversation', 'info');
+    setTimeout(() => {
+        window.location.href = '/video/find-random/';
+    }, 2000);
+}
+
+function handleTypingIndicator(data) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (data.is_typing) {
+        typingIndicator.style.display = 'flex';
+    } else {
+        typingIndicator.style.display = 'none';
+    }
+}
+
+function handleRoomInfo(room) {
+    if (room && room.participant_count === 2) {
+        // Both users present, start call
+        setTimeout(startCall, 1000);
+    }
+}
+
+// Start call
+async function startCall() {
+    if (!peerConnection && localStream) {
+        createPeerConnection();
+
+        try {
+            const offer = await peerConnection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+            await peerConnection.setLocalDescription(offer);
+
+            socket.send(JSON.stringify({
+                type: 'offer',
+                offer: offer
+            }));
+
+            updateConnectionStatus('Calling...', 'info');
+        } catch (error) {
+            console.error('Error creating offer:', error);
+            updateConnectionStatus('Call failed', 'error');
+        }
+    }
+}
+
+// Chat functionality
+function addMessageToChat(message, sender, timestamp) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender === 'You' ? 'own-message' : ''}`;
+
+    const time = new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <strong>${sender}:</strong> ${escapeHtml(message)}
+        </div>
+        <div class="message-time">${time}</div>
+    `;
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// Initialize event listeners
+function initializeEventListeners() {
+    // Chat input
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendMessage');
+
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendChatMessage();
+        } else {
+            // Send typing indicator
+            socket.send(JSON.stringify({
+                type: 'typing_indicator',
+                is_typing: true
+            }));
+
+            // Clear previous timer
+            clearTimeout(typingTimer);
+
+            // Set timer to stop typing indicator
+            typingTimer = setTimeout(() => {
+                socket.send(JSON.stringify({
+                    type: 'typing_indicator',
+                    is_typing: false
+                }));
+            }, 1000);
+        }
+    });
+
+    sendButton.addEventListener('click', sendChatMessage);
+
+    // Media controls
+    document.getElementById('toggleVideo').addEventListener('click', toggleVideo);
+    document.getElementById('toggleAudio').addEventListener('click', toggleAudio);
+    document.getElementById('shareScreen').addEventListener('click', shareScreen);
+    document.getElementById('skipChat').addEventListener('click', skipChat);
+    document.getElementById('endChat').addEventListener('click', endChat);
+
+    // Local video controls
+    document.getElementById('localVideoToggle').addEventListener('click', toggleVideo);
+    document.getElementById('localAudioToggle').addEventListener('click', toggleAudio);
+}
+
+function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+
+    if (message) {
+        // Add to own chat
+        addMessageToChat(message, 'You', new Date().toISOString());
+
+        // Send via WebSocket
+        socket.send(JSON.stringify({
+            type: 'chat_message',
+            message: message
+        }));
+
+        chatInput.value = '';
+
+        // Stop typing indicator
+        socket.send(JSON.stringify({
+            type: 'typing_indicator',
+            is_typing: false
+        }));
+    }
+}
+
+// Media control functions
+function toggleVideo() {
+    if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            isVideoEnabled = videoTrack.enabled;
+
+            const buttons = document.querySelectorAll('#toggleVideo, #localVideoToggle');
+            buttons.forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (isVideoEnabled) {
+                    icon.className = 'fas fa-video';
+                    btn.classList.remove('muted');
+                } else {
+                    icon.className = 'fas fa-video-slash';
+                    btn.classList.add('muted');
+                }
+            });
+        }
+    }
+}
+
+function toggleAudio() {
+    if (localStream) {
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            isAudioEnabled = audioTrack.enabled;
+
+            const buttons = document.querySelectorAll('#toggleAudio, #localAudioToggle');
+            buttons.forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (isAudioEnabled) {
+                    icon.className = 'fas fa-microphone';
+                    btn.classList.remove('muted');
+                } else {
+                    icon.className = 'fas fa-microphone-slash';
+                    btn.classList.add('muted');
+                }
+            });
+        }
+    }
+}
+
+async function shareScreen() {
+    try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true
+        });
+
+        // Replace video track
+        const videoTrack = screenStream.getVideoTracks()[0];
+        const sender = peerConnection.getSenders().find(s =>
+            s.track && s.track.kind === 'video'
+        );
+
+        if (sender) {
+            await sender.replaceTrack(videoTrack);
+        }
+
+        // Update local video
+        localVideo.srcObject = screenStream;
+
+        // Handle screen share end
+        videoTrack.onended = async () => {
+            // Return to camera
+            const cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            });
+
+            const cameraVideoTrack = cameraStream.getVideoTracks()[0];
+            if (sender) {
+                await sender.replaceTrack(cameraVideoTrack);
+            }
+
+            localVideo.srcObject = cameraStream;
+            localStream = cameraStream;
+        };
+
+    } catch (error) {
+        console.error('Error sharing screen:', error);
+        showNotification('Screen sharing failed', 'error');
+    }
+}
+
+function skipChat() {
+    if (confirm('Are you sure you want to skip to the next chat?')) {
+        socket.send(JSON.stringify({
+            type: 'skip_request'
+        }));
+
+        showNotification('Finding new chat partner...', 'info');
+        setTimeout(() => {
+            window.location.href = '/video/find-random/';
+        }, 1000);
+    }
+}
+
+function endChat() {
+    if (confirm('Are you sure you want to end this chat?')) {
+        window.location.href = '{% url "videocall:end_chat" room.id %}';
+    }
+}
+
+// Utility functions
+function updateConnectionStatus(message, type) {
+    const statusEl = document.getElementById('connectionStatus');
+    statusEl.innerHTML = `<i class="fas ${getStatusIcon(type)}"></i> ${message}`;
+    statusEl.className = `connection-status ${type}`;
+}
+
+function getStatusIcon(type) {
+    const icons = {
+        'info': 'fa-circle-notch fa-spin',
+        'success': 'fa-check-circle',
+        'warning': 'fa-exclamation-triangle',
+        'error': 'fa-times-circle'
+    };
+    return icons[type] || 'fa-info-circle';
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${getStatusIcon(type)}"></i>
+        <span>${message}</span>
+    `;
+
+    // Add to page
+    document.body.appendChild(notification);
+
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+
+    // Remove after delay
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    if (peerConnection) {
+        peerConnection.close();
+    }
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+    if (socket) {
+        socket.close();
+    }
+});
+</script>
+
+</div></div>
+{% endblock %}

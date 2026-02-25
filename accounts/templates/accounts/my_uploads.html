@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }}'s Profile - StudyPedia
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4">
+            <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+                <div class="card-body text-center">
+                    {% if profile_user.profile_picture %}
+                        <img src="{{ profile_user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="150">
+                    {% else %}
+                        <img src="{% static 'img/default_profile.png' %}" alt="Default Profile" class="rounded-circle" width="150">
+                    {% endif %}
+                    <h3>@{{ profile_user.username }}</h3>
+                    <p>{{ profile_user.bio|default:"No bio yet." }}</p>
+                    <p>{{ profile_user.college|default:"No college specified" }}</p>
+                    <p>Followers: {{ stats.follower_count }} | Following: {{ stats.following_count }}</p>
+                    {% if is_own_profile %}
+                        <p>Credits: {{ profile_user.credits }}</p>
+                        <p>Wallet Balance: ₹{{ profile_user.wallet_balance }}</p>
+                        <a href="{% url 'accounts:edit_profile' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Edit Profile</a>
+                    {% else %}
+                        <form action="{% url 'accounts:follow_user' profile_user.username %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %}">
+                                {{ is_following|yesno:"Unfollow,Follow" }}
+                            </button>
+                        </form>
+                        <a href="{% url 'social:chat_start' profile_user.username %}" class="btn btn-info mt-2">Start Chat</a>
+                        <a href="{% url 'videocall:create_private_room' profile_user.username %}" class="btn btn-success mt-2">Start Video Call</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for Content -->
+        <div class="col-md-8">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#posts" data-toggle="tab">Posts</a>
+                </li>
+                {% if is_own_profile %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#purchases" data-toggle="tab">Purchases</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#notifications" data-toggle="tab">Notifications</a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#followers" data-toggle="tab">Followers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#following" data-toggle="tab">Following</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <!-- Posts -->
+                <div class="tab-pane active" id="posts">
+                    {% for post in posts %}
+                        <div class="card mt-3" id="post-{{ post.pk }}">
+                            <div class="card-body">
+                                <h5>@{{ post.user.username }}</h5>
+                                <p>{{ post.content }}</p>
+                                {% if post.image %}
+                                    <img src="{{ post.image.url }}" alt="Post Image" class="img-fluid" style="max-width: 300px;">
+                                {% endif %}
+                                <p><small>{{ post.created_at|date:"F d, Y" }}</small></p>
+                                {% if is_own_profile %}
+                                    <a href="{% url 'social:edit_post' post.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="{% url 'social:delete_post' post.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                {% endif %}
+                                <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-info">View Comments</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>No posts yet.</p>
+                    {% endfor %}
+                </div>
+                <!-- Purchases -->
+                {% if is_own_profile %}
+                    <div class="tab-pane" id="purchases">
+                        <h4>Purchases ({{ stats.total_purchases }})</h4>
+                        {% for purchase in purchases %}
+                            <div class="card mt-2" id="item-{{ purchase.content_type.model }}-{{ purchase.object_id }}">
+                                <div class="card-body">
+                                    <h5>{{ purchase.item }} ({{ purchase.content_type.app_label|title }})</h5>
+                                    <p><strong>Status:</strong> {{ purchase.status|title }}</p>
+                                    <p><strong>Amount Paid:</strong> ₹{{ purchase.amount_paid }}</p>
+                                    <p><strong>Credits Used:</strong> {{ purchase.credits_used }}</p>
+                                    <p><strong>Purchased:</strong> {{ purchase.created_at|date:"F d, Y" }}</p>
+                                    {% if purchase.status == 'paid' %}
+                                        <a href="{% url 'ecommerce:download_item' purchase.object_id %}?type={{ purchase.content_type.model }}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-10 px-6 text-sm font-bold uppercase tracking-wide">Download</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No purchases found.</p>
+                        {% endfor %}
+                        <h4>Orders</h4>
+                        {% for order in orders %}
+                            <div class="card mt-2">
+                                <div class="card-body">
+                                    <h5>Order #{{ order.id }}</h5>
+                                    <p><strong>Status:</strong> {{ order.status|title }}</p>
+                                    <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+                                    <p><strong>Credits Used:</strong> {{ order.total_credits }}</p>
+                                    <p><strong>Payment Method:</strong> {{ order.payment_method|title }}</p>
+                                    <p><strong>Created:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+                                    <h6>Items:</h6>
+                                    <ul>
+                                        {% for item in order.items.all %}
+                                            <li>{{ item.item }} ({{ item.content_type.app_label|title }}) - {{ item.quantity }} x ₹{{ item.price_at_purchase }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No orders found.</p>
+                        {% endfor %}
+                    </div>
+                    <!-- Notifications -->
+                    <div class="tab-pane" id="notifications">
+                        {% for notif in notifications %}
+                            <div class="card mt-2">
+                                <div class="card-body">
+                                    {% if notif.type == 'follow' %}
+                                        <p><strong>@{{ notif.sender.username }}</strong> followed you.</p>
+                                    {% elif notif.type == 'comment' %}
+                                        <p><strong>@{{ notif.sender.username }}</strong> commented on your post.</p>
+                                    {% elif notif.type == 'message' %}
+                                        <p><strong>@{{ notif.sender.username }}</strong> sent you a message.</p>
+                                    {% endif %}
+                                    <p><small>{{ notif.created_at|date:"F d, Y H:i" }}</small></p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No notifications.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- Followers -->
+                <div class="tab-pane" id="followers">
+                    {% for follower in followers_page %}
+                        <p><a href="{% url 'accounts:profile' follower.username %}">@{{ follower.username }}</a></p>
+                    {% endfor %}
+                    {% if followers_page.has_previous %}
+                        <a href="?followers_page={{ followers_page.previous_page_number }}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Previous</a>
+                    {% endif %}
+                    {% if followers_page.has_next %}
+                        <a href="?followers_page={{ followers_page.next_page_number }}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Next</a>
+                    {% endif %}
+                </div>
+                <!-- Following -->
+                <div class="tab-pane" id="following">
+                    {% for followed in following_page %}
+                        <p><a href="{% url 'accounts:profile' followed.username %}">@{{ followed.username }}</a></p>
+                    {% endfor %}
+                    {% if following_page.has_previous %}
+                        <a href="?following_page={{ following_page.previous_page_number }}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Previous</a>
+                    {% endif %}
+                    {% if following_page.has_next %}
+                        <a href="?following_page={{ following_page.next_page_number }}" class="flex min-w-[84px] cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-10 px-6 text-black text-sm font-bold uppercase tracking-wide">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div></div>
+{% endblock %}
+{% block extrac_js %}
+<script>
+    window.onload = function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const element = document.querySelector(hash);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                element.style.transition = "background-color 1s ease";
+                element.style.backgroundColor = "#ffff99";
+                setTimeout(() => { element.style.backgroundColor = ""; }, 2000);
+            }
+        }
+    };
+</script>
+
+</div></div>
+{% endblock %}

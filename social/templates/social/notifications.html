@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Notifications - StudyPedia
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8"><div class="bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+<div class="container">
+    <h1 class="text-black tracking-tight text-3xl md:text-5xl font-light font-display uppercase mb-6" >Notifications</h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="bg-white border border-black p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300">
+        <div class="card-body">
+            {% for notif in notifications %}
+                <div class="message">
+                    {% if notif.type == 'follow' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> followed you.</p>
+                    {% elif notif.type == 'comment' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> commented on your <a href="{% url 'social:post_detail' notif.related_post.pk %}">post</a>.</p>
+                    {% elif notif.type == 'message' %}
+                        <p><strong><a href="{% url 'accounts:profile' notif.sender.username %}">@{{ notif.sender.username }}</a></strong> sent you a <a href="{% url 'social:chat_room' notif.related_message.room.id %}">message</a>.</p>
+                    {% endif %}
+                    <p><small>{{ notif.created_at|date:"F d, Y H:i" }}</small></p>
+                </div>
+            {% empty %}
+                <p>No notifications yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+</div></div>
+{% endblock %}

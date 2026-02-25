@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    
+    <!-- Background Decorator -->
+    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/3 z-0"></div>
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div class="w-16 h-16 bg-white border border-black mx-auto flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
+            <span class="material-symbols-outlined text-3xl">how_to_reg</span>
+        </div>
+        <h2 class="text-center text-3xl font-display font-light uppercase tracking-tight text-black">
+            Join StudyPedia
+        </h2>
+        <p class="mt-2 text-center text-sm font-mono text-gray-500 uppercase tracking-widest">
+            Create your digital academic portfolio
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div class="bg-white py-8 px-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border border-black sm:px-10 group hover:-translate-y-1 transition-transform duration-300">
+            
+            {% if messages %}
+                <div class="flex flex-col gap-2 mb-6">
+                    {% for message in messages %}
+                        <div class="p-3 border border-black text-xs font-bold uppercase tracking-widest 
+                            {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-200
+                            {% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-200
+                            {% else %}bg-gray-50 text-black{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">info</span> {{ message }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <style>
+                /* Style auto-generated Django form inputs */
+                .django-form-container input[type="text"],
+                .django-form-container input[type="email"],
+                .django-form-container input[type="password"] {
+                    width: 100%;
+                    padding: 0.75rem 1rem;
+                    border: 1px solid #d1d5db; /* gray-300 */
+                    background-color: #f9fafb; /* gray-50 */
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                    font-size: 0.875rem; /* text-sm */
+                    color: #000;
+                    margin-top: 0.25rem;
+                    transition: border-color 0.15s ease-in-out;
+                }
+                .django-form-container input:focus {
+                    outline: none;
+                    border-color: #000;
+                    background-color: #fff;
+                }
+                .django-form-container label {
+                    display: block;
+                    font-size: 0.75rem; /* text-xs */
+                    font-weight: 700; /* font-bold */
+                    color: #374151; /* gray-700 */
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em; /* tracking-widest */
+                    margin-bottom: 0.25rem;
+                }
+                .django-form-container .help-text {
+                    display: block;
+                    font-size: 0.7rem;
+                    color: #9ca3af; /* gray-400 */
+                    margin-top: 0.25rem;
+                    font-family: ui-monospace, monospace;
+                }
+                .django-form-container .errorlist {
+                    color: #dc2626; /* red-600 */
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    margin-top: 0.25rem;
+                    padding-left: 0;
+                    list-style-type: none;
+                }
+            </style>
+
+            <form class="space-y-6 django-form-container" action="{% url 'accounts:signup' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="form-group mb-4">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                            {{ field.errors }}
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="help-text">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                {% if form.non_field_errors %}
+                    <div class="p-3 border border-red-600 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-widest mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-14 px-6 text-sm font-bold uppercase tracking-widest gap-2">
+                        Create Account <span class="material-symbols-outlined text-[18px]">person_add</span>
+                    </button>
+                    <p class="text-center text-xs text-gray-400 font-light mt-4">By creating an account, you agree to our Terms of Service.</p>
+                </div>
+            </form>
+
+            <div class="mt-8 border-t border-black/10 pt-6">
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500 font-light">
+                        Already have an account?
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'accounts:login' %}" class="w-full flex cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest">
+                        Sign In Instead
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

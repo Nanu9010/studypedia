@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}About - StudentHub{% endblock %}
+
+{% block content %}
+<!-- Minimal Hero -->
+<div class="w-full bg-black text-white py-20 px-4 md:px-8 border-b border-black">
+    <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 block">Our Mission</span>
+            <h1 class="text-4xl md:text-6xl font-light font-display uppercase tracking-tight leading-none mb-6">
+                Redefining the<br><span class="font-bold">Student Economy.</span>
+            </h1>
+        </div>
+        <div>
+            <p class="text-lg font-light text-gray-400 leading-relaxed max-w-lg border-l border-white/20 pl-6">
+                StudyPedia is dedicated to creating a comprehensive educational ecosystem where students can access high-quality study materials, connect with peers, and enhance their learning experience through collaboration and resource sharing.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Grid Features -->
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-20">
+    <div class="flex items-center justify-between mb-12 border-b border-black pb-4">
+        <h2 class="text-3xl font-light font-display uppercase tracking-tight text-black">What We Offer</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="bg-white border border-black p-8 group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined">library_books</span>
+            </div>
+            <h3 class="text-lg font-bold uppercase tracking-widest mb-3">Study Materials</h3>
+            <p class="text-sm font-light text-gray-600 leading-relaxed">Access notes, solved papers, assignments, and practical files strictly categorized by university and branch.</p>
+        </div>
+
+        <div class="bg-gray-50 border border-black p-8 group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined">map</span>
+            </div>
+            <h3 class="text-lg font-bold uppercase tracking-widest mb-3">Learning Roadmaps</h3>
+            <p class="text-sm font-light text-gray-600 leading-relaxed">Follow structured learning paths intelligently designed for different subjects and long-term career goals.</p>
+        </div>
+
+        <div class="bg-white border border-black p-8 group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined">forum</span>
+            </div>
+            <h3 class="text-lg font-bold uppercase tracking-widest mb-3">Community</h3>
+            <p class="text-sm font-light text-gray-600 leading-relaxed">Connect with thousands of other students across campuses to share experiences and resolve exact syllabus queries.</p>
+        </div>
+
+        <div class="bg-gray-50 border border-black p-8 group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center mb-6 relative z-10">
+                <span class="material-symbols-outlined">videocam</span>
+            </div>
+            <h3 class="text-lg font-bold uppercase tracking-widest mb-3 relative z-10">Video Collaboration</h3>
+            <p class="text-sm font-light text-gray-600 leading-relaxed relative z-10">Study together with specialized peer-to-peer integrated WebRTC video calling rooms built natively into your dashboard.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Info & Contact Panels -->
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 pb-20">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 bg-black text-white border border-black p-10 md:p-16 relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-10">
+                <span class="material-symbols-outlined text-[300px] -translate-y-1/4 translate-x-1/4">rocket_launch</span>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-light font-display uppercase tracking-tight mb-6">For Content Creators</h2>
+            <p class="text-lg font-light text-gray-300 leading-relaxed max-w-xl">
+                StudyPedia provides a lucrative platform for diligent students and educators to share their knowledge, earn credits, and generate revenue. Upload your meticulously organized study materials and help classmates succeed while building your own academic portfolio.
+            </p>
+            <a href="{% url 'accounts:signup' %}" class="mt-8 inline-flex cursor-pointer items-center justify-center border border-white hover:bg-white hover:text-black transition-colors h-14 px-8 text-sm font-bold uppercase tracking-widest gap-2">
+                Start Selling <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="bg-white border border-black p-10 md:p-16 flex flex-col justify-center">
+            <h2 class="text-3xl font-light font-display uppercase tracking-tight text-black mb-6">Get In Touch</h2>
+            <p class="text-sm font-light text-gray-600 leading-relaxed mb-8">
+                Have questions, partnership inquiries, or feature suggestions? Our engineering and support team would love to hear from you.
+            </p>
+            <a href="mailto:support@studenthub.com" class="flex items-center gap-4 text-black group">
+                <div class="w-12 h-12 bg-gray-50 border border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">mail</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Email Support</span>
+                    <span class="font-mono text-sm underline decoration-gray-300 group-hover:decoration-black transition-colors">support@studenthub.com</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

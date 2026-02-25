@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}StudyPedia Marketplace - Study Materials{% endblock %}
+
+{% block content %}
+<!-- Top Navigation / Search Header -->
+<div class="w-full bg-white border-b border-black sticky top-0 z-30 shadow-[0_4px_0px_0px_rgba(0,0,0,0.05)]">
+    <div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-display font-light uppercase tracking-tight text-black flex items-center gap-2">
+                <span class="material-symbols-outlined text-black">storefront</span> Marketplace
+            </h1>
+        </div>
+        <div class="w-full md:w-1/3 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400">search</span>
+            <input type="text" placeholder="Search notes, papers..." class="w-full h-10 bg-gray-50 border border-black text-black placeholder:text-gray-400 pl-10 pr-4 focus:outline-none focus:bg-white transition-colors text-sm font-mono tracking-wide">
+        </div>
+    </div>
+</div>
+
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8 flex flex-col md:flex-row gap-8">
+    
+    <!-- Left Sidebar Directories -->
+    <aside class="w-full md:w-1/4 flex flex-col gap-6 hidden md:flex">
+        
+        <div class="bg-white border border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sticky top-24">
+            <h3 class="text-sm font-bold uppercase tracking-widest mb-6 pb-2 border-b border-black">Categories</h3>
+            
+            <ul class="flex flex-col gap-2">
+                <li>
+                    <a href="{% url 'notes:note_list' %}" class="flex items-center justify-between p-3 border border-transparent hover:border-black hover:bg-gray-50 transition-colors group">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-black transition-colors">description</span>
+                            <span class="text-sm font-bold uppercase tracking-wider text-gray-700 group-hover:text-black">Study Notes</span>
+                        </div>
+                        <span class="text-[10px] font-mono bg-gray-100 px-2 py-0.5">{{ stats.total_notes|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'papers:paper_list' %}" class="flex items-center justify-between p-3 border border-black bg-black text-white hover:bg-black/90 transition-colors group">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-white/50 group-hover:text-white transition-colors">article</span>
+                            <span class="text-sm font-bold uppercase tracking-wider">Solved Papers</span>
+                        </div>
+                        <span class="text-[10px] font-mono bg-white/20 text-white px-2 py-0.5">{{ stats.total_papers|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'roadmaps:roadmap_list' %}" class="flex items-center justify-between p-3 border border-transparent hover:border-black hover:bg-gray-50 transition-colors group">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-black transition-colors">map</span>
+                            <span class="text-sm font-bold uppercase tracking-wider text-gray-700 group-hover:text-black">Roadmaps</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'roadmaps:syllabus_list' %}" class="flex items-center justify-between p-3 border border-transparent hover:border-black hover:bg-gray-50 transition-colors group">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-black transition-colors">checklist</span>
+                            <span class="text-sm font-bold uppercase tracking-wider text-gray-700 group-hover:text-black">Syllabi</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+
+            <h3 class="text-sm font-bold uppercase tracking-widest mt-8 mb-6 pb-2 border-b border-black">By University</h3>
+            <ul class="flex flex-col gap-2">
+                {% comment %} Assuming stats.total_universities exists, we might show top 3 or a link here {% endcomment %}
+                <li>
+                    <a href="{% url 'university:university_list' %}" class="text-sm text-gray-600 hover:text-black hover:underline underline-offset-4 decoration-2 decoration-black transition-all">
+                        Browse all {{ stats.total_universities|default:"50+" }} universities &rarr;
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="w-full md:w-3/4 flex flex-col gap-10">
+
+        <!-- Featured Notes Panel -->
+        <section>
+            <div class="flex items-center justify-between mb-6 pb-2 border-b border-black">
+                <h2 class="text-2xl font-light font-display uppercase tracking-tight text-black">Top Rated Notes</h2>
+                <a href="{% url 'notes:note_list' %}" class="text-xs font-bold uppercase tracking-widest text-black hover:text-gray-500 transition-colors">View All</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for note in featured_notes|slice:":3" %}
+                    <div class="bg-white border border-black p-4 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                        <a href="#" class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
+                            {% if note.image %}
+                                <img src="{{ note.image.url }}" alt="{{ note.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% else %}
+                                <div class="w-full h-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-200">menu_book</span>
+                                </div>
+                            {% endif %}
+                            <div class="absolute top-2 left-2 bg-white border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-black">Note</div>
+                        </a>
+                        <div class="flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ note.name }}"><a href="#">{{ note.name }}</a></h3>
+                            <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-4 truncate">{{ note.branch.name }} ({{ note.branch.degree.name }})</p>
+                            
+                            <div class="mt-auto flex items-center justify-between pt-4 border-t border-black/10">
+                                <div>
+                                    <span class="block font-bold text-lg leading-none">₹{{ note.price }}</span>
+                                    <span class="text-[10px] text-gray-400 font-mono uppercase tracking-widest">{{ note.credit_price }} CR</span>
+                                </div>
+                                <a href="{% url 'ecommerce:add_to_cart' note.pk %}?type=note" class="w-10 h-10 border border-black bg-white flex justify-center items-center hover:bg-black hover:text-white transition-colors tooltip-target" title="Add to Cart">
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-span-full py-12 text-center border-2 border-dashed border-gray-200 bg-gray-50">
+                        <p class="text-sm font-bold uppercase tracking-widest text-gray-400">No Featured Notes Available</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Featured Papers Panel -->
+        <section>
+            <div class="flex items-center justify-between mb-6 pb-2 border-b border-black">
+                <h2 class="text-2xl font-light font-display uppercase tracking-tight text-black">Trending Past Papers</h2>
+                <a href="{% url 'papers:paper_list' %}" class="text-xs font-bold uppercase tracking-widest text-black hover:text-gray-500 transition-colors">View All</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for paper in featured_papers|slice:":3" %}
+                    <div class="bg-white border border-black p-4 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                        <a href="#" class="block w-full aspect-[4/3] bg-gray-50 border border-black mb-4 overflow-hidden relative">
+                            {% if paper.image %}
+                                <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500">
+                            {% else %}
+                                <div class="w-full h-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-200">description</span>
+                                </div>
+                            {% endif %}
+                            <div class="absolute top-2 left-2 bg-black border border-black px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white">Paper</div>
+                        </a>
+                        <div class="flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold font-display uppercase tracking-tight mb-1 truncate" title="{{ paper.name }}"><a href="#">{{ paper.name }}</a></h3>
+                            <p class="text-xs font-mono text-gray-500 uppercase tracking-widest mb-4 truncate">{{ paper.get_exam_type_display }} &bull; {{ paper.branch.name }}</p>
+                            
+                            <div class="mt-auto flex items-center justify-between pt-4 border-t border-black/10">
+                                <div>
+                                    <span class="block font-bold text-lg leading-none">₹{{ paper.price }}</span>
+                                    <span class="text-[10px] text-gray-400 font-mono uppercase tracking-widest">{{ paper.credit_price }} CR</span>
+                                </div>
+                                <a href="{% url 'ecommerce:add_to_cart' paper.pk %}?type=paper" class="w-10 h-10 border border-black bg-white flex justify-center items-center hover:bg-black hover:text-white transition-colors" title="Add to Cart">
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-span-full py-12 text-center border-2 border-dashed border-gray-200 bg-gray-50">
+                        <p class="text-sm font-bold uppercase tracking-widest text-gray-400">No Featured Papers Available</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- CTA Banner -->
+        <section class="mt-8 bg-black border border-black text-white p-8 md:p-12 relative overflow-hidden flex flex-col items-center text-center">
+            <div class="absolute inset-0 opacity-[0.05]" style="background-image: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+            <h2 class="text-3xl font-light font-display uppercase tracking-tight mb-4 relative z-10">Start Selling Your Notes</h2>
+            <p class="text-gray-400 font-light max-w-lg mb-8 relative z-10">Turn your hard work into passive income. Upload your high-quality study materials and earn money every time someone downloads them.</p>
+            <a href="{% url 'accounts:signup' %}" class="flex cursor-pointer items-center justify-center border border-white bg-white text-black hover:bg-transparent hover:text-white transition-colors h-14 px-8 text-sm font-bold uppercase tracking-widest relative z-10 gap-2">
+                Become a Seller <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </section>
+
+    </main>
+</div>
+{% endblock %}

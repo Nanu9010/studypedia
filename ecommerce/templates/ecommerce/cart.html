@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Cart - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-8">
+    
+    <div class="flex items-center justify-between border-b border-black pb-6 mb-8 mt-4">
+        <div>
+            <h1 class="text-4xl font-light font-display uppercase tracking-tight text-black mb-2">Shopping Cart</h1>
+            <p class="text-sm text-gray-500 font-light">Review your study materials before secure checkout.</p>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-black">
+            <span class="material-symbols-outlined text-2xl">lock</span> Secure Checkout
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flex flex-col gap-2 mb-8">
+            {% for message in messages %}
+                <div class="p-4 border border-black text-sm font-bold uppercase tracking-widest 
+                    {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-200
+                    {% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-200
+                    {% else %}bg-gray-50 text-black{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if items %}
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Left Side: Cart Items -->
+            <div class="w-full lg:w-2/3 flex flex-col gap-4">
+                {% for item in items %}
+                    <div class="bg-white border border-black p-4 flex flex-col sm:flex-row gap-6 items-center relative group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+                        
+                        <!-- Thumbnail -->
+                        <div class="w-full sm:w-32 h-32 bg-gray-50 border border-black shrink-0 flex items-center justify-center overflow-hidden">
+                            {% if item.content_type.model == 'note' %}
+                                <img src="{{ item.item.image.url|default:'/static/img/default_resource.png' }}" alt="{{ item.item.name }}" class="w-full h-full object-cover">
+                            {% elif item.content_type.model == 'paper' %}
+                                <img src="{{ item.item.image.url|default:'/static/img/default_resource.png' }}" alt="{{ item.item.name }}" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+
+                        <!-- Details -->
+                        <div class="flex-1 w-full flex flex-col justify-between py-2">
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="text-xl font-display font-bold uppercase tracking-tight text-black">{{ item.item.name }}</h3>
+                                    <p class="font-bold text-lg text-black">₹{{ item.item.price }}</p>
+                                </div>
+                                <p class="text-xs font-mono uppercase tracking-widest text-gray-500 mb-2">
+                                    {% if item.content_type.model == 'note' %} Note &bull; {{ item.item.branch.name }} {% else %} Paper &bull; {{ item.item.get_exam_type_display }} {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between mt-4 border-t border-black/10 pt-4">
+                                <div class="flex items-center gap-4 text-sm font-bold uppercase tracking-widest">
+                                    <span class="text-gray-500">Qty: {{ item.quantity }}</span>
+                                    <span class="text-black bg-gray-100 px-2 py-1"><span class="material-symbols-outlined text-[14px] align-middle">toll</span> {{ item.item.credit_price }} Credits</span>
+                                </div>
+                                
+                                <a href="{% url 'ecommerce:remove_from_cart' item.object_id %}?type={{ item.content_type.model }}" class="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">delete</span> Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Continue Shopping Links -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                    <a href="{% url 'notes:note_list' %}" class="flex-1 flex cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-black text-xs font-bold uppercase tracking-widest gap-2">
+                        <span class="material-symbols-outlined text-[16px]">arrow_back</span> Browse Notes
+                    </a>
+                    <a href="{% url 'papers:paper_list' %}" class="flex-1 flex cursor-pointer items-center justify-center border border-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-black text-xs font-bold uppercase tracking-widest gap-2">
+                        <span class="material-symbols-outlined text-[16px]">arrow_back</span> Browse Papers
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side: Order Summary -->
+            <div class="w-full lg:w-1/3">
+                <div class="bg-gray-50 border border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sticky top-24">
+                    <h3 class="text-xl font-display font-bold uppercase tracking-tight mb-6 border-b border-black pb-4">Order Summary</h3>
+                    
+                    <div class="flex flex-col gap-4 mb-6 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-light">Subtotal</span>
+                            <span class="font-bold text-black">₹{{ total_amount }}</span>
+                        </div>
+                        
+                        {% if discount > 0 %}
+                            <div class="flex justify-between text-green-600">
+                                <span class="font-light">Discount ({{ coupon.code }})</span>
+                                <span class="font-bold">-₹{{ discount }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-light">Digital Delivery</span>
+                            <span class="font-bold text-black border border-black px-1 text-[10px] uppercase">Free</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center border-y border-black py-4 mb-6">
+                        <span class="text-lg font-bold uppercase tracking-widest">Total</span>
+                        <div class="text-right">
+                            <span class="block text-2xl font-bold text-black">₹{{ final_amount }}</span>
+                            <span class="text-xs font-mono text-gray-500 tracking-wider">or {{ total_credits }} Credits</span>
+                        </div>
+                    </div>
+
+                    <!-- Coupon Area -->
+                    <div class="mb-8">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Promo Code</p>
+                        <form action="{% url 'ecommerce:checkout' %}" method="post" class="flex flex-col gap-2">
+                            {% csrf_token %}
+                            <div class="flex">
+                                <input type="text" name="coupon_code" class="w-full h-10 bg-white border border-black text-black placeholder:text-gray-400 px-3 focus:outline-none focus:bg-gray-50 transition-colors text-sm font-mono tracking-wide" placeholder="Enter code" {% if coupon %}value="{{ coupon.code }}" readonly{% endif %}>
+                                <button type="submit" class="flex cursor-pointer items-center justify-center border-y border-r border-black hover:bg-black hover:text-white transition-colors h-10 px-4 text-xs font-bold uppercase tracking-widest shrink-0 bg-gray-100 text-black">
+                                    Apply
+                                </button>
+                            </div>
+                            {% if coupon %}
+                                <a href="{% url 'ecommerce:checkout' %}" class="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 transition-colors mt-1 text-right">Remove</a>
+                            {% endif %}
+                        </form>
+                    </div>
+
+                    <!-- Checkout Buttons -->
+                    <div class="flex flex-col gap-3">
+                        {% if can_pay_with_credits %}
+                            <form action="{% url 'ecommerce:checkout' %}" method="post" class="w-full">
+                                {% csrf_token %}
+                                <input type="hidden" name="payment_method" value="credits">
+                                <button type="submit" class="w-full flex cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-sm font-bold uppercase tracking-widest gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">toll</span> Pay with Credits
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <form action="{% url 'ecommerce:checkout' %}" method="post" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="razorpay">
+                            <button type="submit" class="w-full flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-14 px-6 text-sm font-bold uppercase tracking-widest gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                                Secure Checkout <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="mt-6 flex items-center justify-center gap-4 text-gray-400">
+                        <span class="material-symbols-outlined text-2xl" title="Secure Encrypted Payment">enhanced_encryption</span>
+                        <span class="material-symbols-outlined text-2xl" title="Instant Digital Delivery">bolt</span>
+                        <span class="material-symbols-outlined text-2xl" title="Verified Study Materials">verified</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-20 bg-gray-50 border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden group">
+            <div class="absolute inset-0 bg-white -z-10 group-hover:bg-gray-50 transition-colors"></div>
+            
+            <div class="w-24 h-24 bg-white border border-black flex items-center justify-center rounded-full mb-6">
+                <span class="material-symbols-outlined text-4xl text-black">shopping_cart</span>
+            </div>
+            
+            <h3 class="text-3xl font-display font-bold uppercase tracking-tight text-black mb-2">Your cart is empty</h3>
+            <p class="text-gray-500 font-light mb-8 max-w-md text-center">Your shopping cart is currently empty. Browse our massive repository of high-quality study notes and previous year papers.</p>
+            
+            <div class="flex gap-4">
+                <a href="{% url 'notes:note_list' %}" class="flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-12 px-8 text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                    Find Notes
+                </a>
+                <a href="{% url 'papers:paper_list' %}" class="flex cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-black hover:text-white transition-colors h-12 px-8 text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                    Find Papers
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

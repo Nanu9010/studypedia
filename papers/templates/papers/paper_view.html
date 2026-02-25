@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ paper.name }} - StudyPedia{% endblock %}
+
+{% block content %}
+<main class="flex-1 flex flex-col md:flex-row max-w-[1440px] mx-auto w-full bg-white border-x border-black min-h-[calc(100vh-64px)]">
+    
+    <!-- Main Left Viewer Column -->
+    <div class="flex-1 border-r border-black p-8 md:p-12 overflow-y-auto">
+        <!-- Breadcrumbs -->
+        <div class="flex flex-wrap gap-2 mb-6 items-center font-mono text-xs uppercase tracking-wide">
+            <a class="text-gray-500 hover:text-black transition-colors" href="{% url 'core:home' %}">Home</a>
+            <span class="text-gray-300">/</span>
+            <a class="text-gray-500 hover:text-black transition-colors" href="{% url 'papers:paper_list' %}">Papers</a>
+            <span class="text-gray-300">/</span>
+            <span class="text-black font-bold">{{ paper.name }}</span>
+        </div>
+
+        <!-- Document Viewer Mockup -->
+        <div class="bg-gray-100 border border-black p-8 flex flex-col items-center justify-start shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <div class="w-full bg-white shadow-lg border border-gray-300 mb-8 max-w-3xl overflow-hidden group">
+                {% if paper.image %}
+                    <img src="{{ paper.image.url }}" alt="{{ paper.name }} Preview" class="w-full h-auto object-cover">
+                {% else %}
+                    <!-- Skeleton PDF Mockup Layout if no image -->
+                    <div class="aspect-[1/1.414] relative p-12 bg-white flex flex-col gap-6 grayscale opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div class="w-full flex justify-center mb-6">
+                            <span class="material-symbols-outlined text-6xl text-gray-200">history_edu</span>
+                        </div>
+                        <div class="w-full h-8 bg-gray-200"></div>
+                        <div class="w-3/4 h-8 bg-gray-200 mb-8"></div>
+                        <div class="space-y-4">
+                            <div class="w-full h-4 bg-gray-100"></div>
+                            <div class="w-full h-4 bg-gray-100"></div>
+                            <div class="w-full h-4 bg-gray-100"></div>
+                            <div class="w-5/6 h-4 bg-gray-100"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 my-8">
+                            <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-gray-300">image</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="w-full h-3 bg-gray-100"></div>
+                                <div class="w-full h-3 bg-gray-100"></div>
+                                <div class="w-full h-3 bg-gray-100"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="w-full h-4 bg-gray-100"></div>
+                            <div class="w-full h-4 bg-gray-100"></div>
+                            <div class="w-4/6 h-4 bg-gray-100"></div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- PDF Controls -->
+            <div class="flex items-center gap-4 text-sm font-mono uppercase bg-white border border-black p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <button class="p-2 hover:bg-black hover:text-white border border-transparent hover:border-black transition-colors" disabled>
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <span class="px-4 border-x border-gray-200">Preview Mode</span>
+                <button class="p-2 hover:bg-black hover:text-white border border-transparent hover:border-black transition-colors" disabled>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        {% comment %}
+        <!-- Hidden Comments section for later implementation -->
+        <div class="mt-16 max-w-3xl mx-auto w-full hidden">
+            <h3 class="text-xl font-bold uppercase tracking-tight mb-8 pb-4 border-b border-black">Discussion (0)</h3>
+            <div class="flex gap-4 mb-8">
+                <div class="w-10 h-10 bg-gray-200 border border-black flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-gray-400">person</span>
+                </div>
+                <div class="flex-1">
+                    <textarea class="w-full bg-gray-50 border border-black p-4 text-sm focus:ring-0 focus:border-black rounded-none min-h-[100px] font-mono" placeholder="Ask a question about this paper..."></textarea>
+                    <div class="flex justify-end mt-2">
+                        <button class="bg-black text-white px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black hover:border border border-black hover:border-black transition-colors">Post</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-full py-8 text-center border-2 border-dashed border-gray-200 bg-gray-50">
+                <p class="text-sm font-bold uppercase tracking-widest text-gray-400">No discussions yet.</p>
+            </div>
+        </div>
+        {% endcomment %}
+    </div>
+
+    <!-- Right Metadata Sidebar -->
+    <aside class="w-full md:w-96 shrink-0 bg-white p-8 border-l border-black overflow-y-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-light font-display leading-tight mb-4 uppercase">{{ paper.name }}</h1>
+            <div class="flex items-center gap-2 mb-6 border-b border-black pb-4">
+                <div class="flex text-black">
+                    <span class="material-symbols-outlined text-sm">star</span>
+                    <span class="material-symbols-outlined text-sm">star</span>
+                    <span class="material-symbols-outlined text-sm">star</span>
+                    <span class="material-symbols-outlined text-sm">star</span>
+                    <span class="material-symbols-outlined text-sm text-gray-300">star</span>
+                </div>
+                <span class="text-xs font-mono font-bold">(4.0)</span>
+                <span class="text-[10px] text-gray-500 uppercase tracking-widest ml-2 bg-gray-100 px-2 py-0.5">{{ paper.get_exam_type_display }}</span>
+            </div>
+            
+            <div class="flex items-end justify-between mb-6">
+                <div>
+                    <span class="block text-3xl font-bold leading-none text-black">₹{{ paper.price }}</span>
+                    <span class="text-xs font-mono uppercase tracking-widest text-gray-500 mt-1 block">{{ paper.credit_price }} Credits</span>
+                </div>
+            </div>
+
+            <!-- Call to Actions -->
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'ecommerce:add_to_cart' paper.pk %}?type=paper" class="w-full bg-black text-white h-14 flex items-center justify-center gap-3 hover:bg-white hover:text-black border border-black transition-all group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                    <span class="font-bold uppercase tracking-widest text-sm">Add to Cart</span>
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform text-[18px]">add_shopping_cart</span>
+                </a>
+                {% if user.is_staff %}
+                <a href="{% url 'papers:paper_update' paper.pk %}" class="w-full bg-white text-black h-12 flex items-center justify-center gap-2 hover:bg-gray-50 border border-black transition-colors font-bold uppercase tracking-widest text-xs">
+                    <span class="material-symbols-outlined text-[16px]">edit</span> Edit Details
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Uploader Info -->
+        <div class="border-t border-b border-black py-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 border border-black bg-gray-50 flex items-center justify-center rounded-full overflow-hidden shrink-0">
+                        <span class="material-symbols-outlined text-gray-400">person</span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-0.5">Uploaded By</p>
+                        <a href="#" class="font-bold text-sm hover:underline underline-offset-4 decoration-2">Admin Team</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="space-y-6">
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-black mb-3 pb-2 border-b border-black/10">Paper Metadata</h4>
+                <div class="grid grid-cols-2 gap-y-3 text-sm font-mono">
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">University</span>
+                    <span class="font-bold text-right truncate border-b border-dashed border-gray-200" title="{{ paper.branch.degree.university.name }}">{{ paper.branch.degree.university.name }}</span>
+                    
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">Degree</span>
+                    <span class="font-bold text-right truncate border-b border-dashed border-gray-200" title="{{ paper.branch.degree.name }}">{{ paper.branch.degree.name }}</span>
+                    
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">Branch</span>
+                    <span class="font-bold text-right border-b border-dashed border-gray-200">{{ paper.branch.name }}</span>
+                    
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">Year</span>
+                    <span class="font-bold text-right border-b border-dashed border-gray-200">{{ paper.year }}</span>
+                    
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">Format</span>
+                    <span class="font-bold text-right border-b border-dashed border-gray-200">PDF Document</span>
+                    
+                    <span class="text-gray-500 uppercase text-[10px] tracking-widest border-b border-dashed border-gray-200">Ref Code</span>
+                    <span class="font-bold text-right border-b border-dashed border-gray-200">{{ paper.code }}</span>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-black mb-3 pb-2 border-b border-black/10">Quick Tags</h4>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-2 py-1 border border-black bg-white text-[10px] text-black font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer">{{ paper.branch.name }}</span>
+                    <span class="px-2 py-1 border border-black bg-white text-[10px] text-black font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer">{{ paper.get_exam_type_display }}</span>
+                    <span class="px-2 py-1 border border-black bg-white text-[10px] text-black font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer">{{ paper.year }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-black bg-gray-50 p-4 border text-center">
+                <span class="material-symbols-outlined text-gray-400 mb-2">lock</span>
+                <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Full download unlocks immediately after secure purchase.</p>
+            </div>
+        </div>
+    </aside>
+</main>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Purchases - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-12">
+
+    <div class="flex items-center justify-between border-b border-black pb-6 mb-8 mt-4">
+        <div>
+            <h1 class="text-4xl font-light font-display uppercase tracking-tight text-black mb-2">My Purchases</h1>
+            <p class="text-sm text-gray-500 font-light">View your complete order history and access your digital study materials.</p>
+        </div>
+        <div class="hidden sm:flex items-center gap-2">
+            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-black text-white">{{ orders.count|default:"0" }} Orders Found</span>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flex flex-col gap-2 mb-8">
+            {% for message in messages %}
+                <div class="p-4 border border-black text-sm font-bold uppercase tracking-widest 
+                    {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-200
+                    {% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-200
+                    {% else %}bg-gray-50 text-black{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if orders %}
+        <div class="flex flex-col gap-6">
+            {% for order in orders %}
+                <div class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group">
+                    <!-- Order Header -->
+                    <div class="p-4 md:p-6 bg-gray-50 border-b border-black flex flex-col md:flex-row justify-between md:items-center gap-4 cursor-pointer" onclick="document.getElementById('order-body-{{ order.id }}').classList.toggle('hidden')">
+                        <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Placed</span>
+                                <span class="font-mono">{{ order.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Total Amount</span>
+                                <span class="font-bold">₹{{ order.total_amount }}</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Number</span>
+                                <span class="font-mono">#{{ order.id }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border {% if order.status == 'paid' or order.status == 'completed' %}border-green-500 text-green-600 bg-green-50{% else %}border-orange-500 text-orange-600 bg-orange-50{% endif %}">
+                                {{ order.status }}
+                            </span>
+                            <div class="w-8 h-8 rounded-full bg-white border border-black flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Body (Toggleable) -->
+                    <div id="order-body-{{ order.id }}" class="p-4 md:p-6 {% if not forloop.first %}hidden{% endif %}">
+                        <h4 class="text-sm font-bold uppercase tracking-widest mb-4">Purchased Items</h4>
+                        <ul class="flex flex-col gap-3">
+                            {% for item in order.items.all %}
+                                <li class="p-4 border border-black/10 flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-black hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 bg-gray-100 border border-black flex items-center justify-center shrink-0 text-black">
+                                            <span class="material-symbols-outlined">description</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-black leading-tight mb-1">{{ item.item.name|default:"Unknown Item" }}</p>
+                                            <p class="text-[10px] font-mono uppercase tracking-widest text-gray-500">
+                                                Qty: {{ item.quantity }} &bull; {{ item.content_type.name|default:"Item" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full border-t border-black/10 pt-3 sm:border-t-0 sm:pt-0">
+                                        <span class="font-bold text-black border border-black px-2 py-1 text-sm bg-white">
+                                            ₹{{ item.price_at_purchase }}
+                                            {% if item.credits_at_purchase %} + {{ item.credits_at_purchase }} CR{% endif %}
+                                        </span>
+                                        <a href="{% url 'accounts:profile' %}#purchases" class="text-xs font-bold uppercase tracking-widest text-black hover:underline underline-offset-4 decoration-2">
+                                            Go to Library
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-20 bg-gray-50 border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden group">
+            <div class="absolute inset-0 bg-white -z-10 group-hover:bg-gray-50 transition-colors"></div>
+            
+            <div class="w-24 h-24 bg-white border border-black flex items-center justify-center rounded-full mb-6">
+                <span class="material-symbols-outlined text-4xl text-black">package</span>
+            </div>
+            
+            <h3 class="text-3xl font-display font-bold uppercase tracking-tight text-black mb-2">No Past Orders Found</h3>
+            <p class="text-gray-500 font-light mb-8 max-w-md text-center">It looks like you haven't bought anything yet. Explore our comprehensive library of study materials.</p>
+            
+            <a href="{% url 'ecommerce:marketplace' %}" class="flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-14 px-8 text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 gap-2">
+                Browse Marketplace <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

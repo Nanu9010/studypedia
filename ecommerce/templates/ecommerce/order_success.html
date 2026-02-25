@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Success - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center p-4 py-12 md:py-24 relative overflow-hidden">
+    
+    <!-- Background Decorator -->
+    <div class="absolute inset-0 z-0 opacity-20" style="background-image: repeating-linear-gradient(0deg, #e5e7eb, #e5e7eb 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #e5e7eb, #e5e7eb 1px, transparent 1px, transparent 40px);"></div>
+    
+    <div class="w-full max-w-lg bg-white border border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center relative z-10">
+        
+        <div class="w-20 h-20 bg-green-50 justify-center items-center flex rounded-full border border-green-600 mx-auto mb-6 shadow-inner">
+            <span class="material-symbols-outlined text-4xl text-green-600">check_circle</span>
+        </div>
+        
+        <h1 class="text-3xl font-display font-bold uppercase tracking-tight text-black mb-2">Payment Successful</h1>
+        <p class="text-sm text-gray-500 font-light mb-8">Thank you for your purchase. Your digital study materials have been securely added to your library.</p>
+        
+        <div class="bg-gray-50 border border-black p-4 text-left mb-8 flex justify-between items-center">
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Reference</span>
+                <span class="font-mono text-lg font-bold">#{{ order.id }}</span>
+            </div>
+            <span class="material-symbols-outlined text-black/20 text-4xl">receipt_long</span>
+        </div>
+        
+        <div class="flex flex-col gap-3">
+            <a href="{% url 'accounts:profile' %}#purchases" class="w-full flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-14 px-6 text-sm font-bold uppercase tracking-widest gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
+                Open My Library <span class="material-symbols-outlined text-[18px]">library_books</span>
+            </a>
+            <a href="{% url 'ecommerce:marketplace' %}" class="w-full flex cursor-pointer items-center justify-center border border-black bg-white text-black hover:bg-gray-50 transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

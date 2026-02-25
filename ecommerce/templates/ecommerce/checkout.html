@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - StudyPedia{% endblock %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto w-full px-4 md:px-8 py-12 flex justify-center">
+    
+    <div class="w-full max-w-2xl bg-white border border-black p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+        
+        <!-- Background Decorator -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-50 border-l border-b border-black rounded-bl-full flex items-center justify-center -mr-16 -mt-16 z-0">
+            <span class="material-symbols-outlined text-4xl text-black/10 translate-y-4 -translate-x-4">security</span>
+        </div>
+
+        <div class="relative z-10">
+            <h1 class="text-3xl font-display font-light uppercase tracking-tight text-black mb-2 flex items-center gap-3">
+                <span class="material-symbols-outlined">payments</span> Secure Checkout
+            </h1>
+            <p class="text-sm font-light text-gray-500 mb-8 pb-6 border-b border-black">Review your order details and select a payment method.</p>
+
+            {% if messages %}
+                <div class="flex flex-col gap-2 mb-8">
+                    {% for message in messages %}
+                        <div class="p-3 border border-black text-xs font-bold uppercase tracking-widest 
+                            {% if message.tags == 'error' %}bg-red-50 text-red-600 border-red-200
+                            {% elif message.tags == 'success' %}bg-green-50 text-green-600 border-green-200
+                            {% else %}bg-gray-50 text-black{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Order Summary -->
+            <div class="bg-gray-50 border border-black p-6 mb-8">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 pb-2 border-b border-black/10">Order Details</h3>
+                
+                <div class="flex flex-col gap-3 text-sm mb-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-light">Subtotal</span>
+                        <span class="font-mono text-black">₹{{ total_amount }}</span>
+                    </div>
+                    {% if discount > 0 %}
+                        <div class="flex justify-between items-center">
+                            <span class="text-green-600 font-light">Discount ({{ coupon.code }})</span>
+                            <span class="font-mono text-green-600 font-bold">-₹{{ discount }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 font-light">Digital Delivery</span>
+                        <span class="font-bold text-black border border-black px-2 py-0.5 text-[10px] uppercase">Free</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-black pt-4">
+                    <span class="text-lg font-bold uppercase tracking-widest text-black">Total to Pay</span>
+                    <div class="text-right">
+                        <span class="block text-2xl font-bold text-black leading-none mb-1">₹{{ final_amount }}</span>
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500">or {{ total_credits }} Credits</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promo Code Form -->
+            <div class="mb-10">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Have a Promo Code?</h3>
+                <form method="post" action="{% url 'ecommerce:checkout' %}" class="flex flex-col sm:flex-row gap-2">
+                    {% csrf_token %}
+                    <div class="flex w-full">
+                        <input type="text" name="coupon_code" class="w-full h-12 bg-white border border-black text-black placeholder:text-gray-400 px-4 focus:outline-none focus:bg-gray-50 transition-colors text-sm font-mono tracking-wide" placeholder="Enter code" {% if coupon %}value="{{ coupon.code }}" readonly{% endif %}>
+                        <button type="submit" class="flex cursor-pointer items-center justify-center border-y border-r border-black hover:bg-black hover:text-white transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest shrink-0 bg-gray-100 text-black">
+                            Apply
+                        </button>
+                    </div>
+                    {% if coupon %}
+                        <a href="{% url 'ecommerce:checkout' %}" class="flex cursor-pointer items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors h-12 px-6 text-xs font-bold uppercase tracking-widest shrink-0">
+                            Remove
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 pb-2 border-b border-black">Payment Method</h3>
+            
+            <div class="flex flex-col gap-4">
+                <!-- Credits Payment -->
+                {% if can_pay_with_credits %}
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="payment_method" value="credits">
+                        <button type="submit" class="w-full relative group">
+                            <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 transition-transform group-hover:translate-x-0 group-hover:translate-y-0 -z-10"></div>
+                            <div class="w-full bg-white border border-black p-4 flex items-center justify-between hover:bg-gray-50 transition-colors z-10 cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined">toll</span>
+                                    </div>
+                                    <div class="text-left">
+                                        <span class="block text-sm font-bold uppercase tracking-widest text-black">Study Credits</span>
+                                        <span class="block text-xs font-mono text-gray-500">{{ user.credits }} Available</span>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-black group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </div>
+                        </button>
+                    </form>
+                {% else %}
+                    <!-- Disabled Credits Option -->
+                    <div class="w-full bg-gray-50 border border-gray-300 p-4 flex items-center justify-between opacity-60 cursor-not-allowed">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-gray-300 text-white rounded-full flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined">toll</span>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold uppercase tracking-widest text-gray-600">Study Credits</span>
+                                <span class="block text-[10px] font-mono text-red-500 tracking-widest uppercase mt-0.5">Insufficient ({{ user.credits }} Available)</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Razorpay Payment -->
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="payment_method" value="razorpay">
+                    <button type="submit" class="w-full relative group">
+                        <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 transition-transform group-hover:translate-x-0 group-hover:translate-y-0 -z-10"></div>
+                        <div class="w-full bg-white border border-black p-4 flex items-center justify-between hover:bg-gray-50 transition-colors z-10 cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-inner">
+                                    <span class="material-symbols-outlined">credit_card</span>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-sm font-bold uppercase tracking-widest text-black">Cards / UPI / NetBanking</span>
+                                    <span class="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Secured by Razorpay</span>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-black group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Cancel/Back -->
+            <div class="mt-8 text-center pt-6 border-t border-black/10">
+                <a href="{% url 'ecommerce:cart' %}" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span> Return to Cart
+                </a>
+            </div>
+
+            {% if razorpay_order_id %}
+                <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                <script>
+                    var options = {
+                        "key": "{{ razorpay_key_id }}",
+                        "amount": "{{ amount_paise }}",
+                        "currency": "INR",
+                        "name": "StudyPedia Marketplace",
+                        "description": "Premium Study Materials Order #{{ order.id }}",
+                        "order_id": "{{ razorpay_order_id }}",
+                        "handler": function (response) {
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = "{% url 'ecommerce:payment_callback' %}";
+                            
+                            // CSRF token is required for the callback POST
+                            var csrfField = document.createElement('input');
+                            csrfField.type = 'hidden';
+                            csrfField.name = 'csrfmiddlewaretoken';
+                            csrfField.value = '{{ csrf_token }}';
+                            form.appendChild(csrfField);
+                            
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'razorpay_payment_id';
+                            input.value = response.razorpay_payment_id;
+                            form.appendChild(input);
+                            
+                            input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'razorpay_order_id';
+                            input.value = response.razorpay_order_id;
+                            form.appendChild(input);
+                            
+                            input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'razorpay_signature';
+                            input.value = response.razorpay_signature;
+                            form.appendChild(input);
+                            
+                            document.body.appendChild(form);
+                            form.submit();
+                        },
+                        "prefill": {
+                            "name": "{{ user.username }}",
+                            "email": "{{ user.email }}",
+                            "contact": "{{ user.phone }}"
+                        },
+                        "theme": {
+                            "color": "#000000" // Match Stitch UI dark theme
+                        }
+                    };
+                    var rzp = new Razorpay(options);
+                    rzp.open();
+                </script>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
