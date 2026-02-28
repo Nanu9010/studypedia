@@ -9,10 +9,10 @@
     <div class="flex items-center justify-between border-b border-black pb-6 mb-8 mt-4">
         <div>
             <h1 class="text-4xl font-light font-display uppercase tracking-tight text-black mb-2">My Purchases</h1>
-            <p class="text-sm text-gray-500 font-light">View your complete order history and access your digital study materials.</p>
+            <p class="text-sm text-gray-500 font-light">Your digital study materials library — all paid items ready to download.</p>
         </div>
         <div class="hidden sm:flex items-center gap-2">
-            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-black text-white">{{ orders.count|default:"0" }} Orders Found</span>
+            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-black text-white">{{ purchases|length }} Item{{ purchases|length|pluralize }}</span>
         </div>
     </div>
 
@@ -29,70 +29,75 @@
         </div>
     {% endif %}
 
-    {% if orders %}
-        <div class="flex flex-col gap-6">
-            {% for order in orders %}
-                <div class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group">
-                    <!-- Order Header -->
-                    <div class="p-4 md:p-6 bg-gray-50 border-b border-black flex flex-col md:flex-row justify-between md:items-center gap-4 cursor-pointer" onclick="document.getElementById('order-body-{{ order.id }}').classList.toggle('hidden')">
-                        <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Placed</span>
-                                <span class="font-mono">{{ order.created_at|date:"M d, Y" }}</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Total Amount</span>
-                                <span class="font-bold">₹{{ order.total_amount }}</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Number</span>
-                                <span class="font-mono">#{{ order.id }}</span>
-                            </div>
+    {% if purchases %}
+        <div class="flex flex-col gap-4">
+            {% for purchase in purchases %}
+                <div class="bg-white border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+                    
+                    <!-- Item Icon + Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gray-100 border border-black flex items-center justify-center shrink-0">
+                            {% if purchase.content_type.model == 'note' %}
+                                <span class="material-symbols-outlined text-2xl text-black">menu_book</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-2xl text-black">description</span>
+                            {% endif %}
                         </div>
-                        
-                        <div class="flex items-center gap-4">
-                            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border {% if order.status == 'paid' or order.status == 'completed' %}border-green-500 text-green-600 bg-green-50{% else %}border-orange-500 text-orange-600 bg-orange-50{% endif %}">
-                                {{ order.status }}
-                            </span>
-                            <div class="w-8 h-8 rounded-full bg-white border border-black flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                        <div>
+                            <h3 class="font-bold text-black text-lg leading-tight mb-1">
+                                {{ purchase.item.name|default:"Unknown Item" }}
+                            </h3>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-0.5">
+                                    {{ purchase.content_type.name|capfirst }}
+                                </span>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500">
+                                    {{ purchase.created_at|date:"M d, Y" }}
+                                </span>
+                                {% if purchase.amount_paid > 0 %}
+                                    <span class="text-[10px] font-mono text-black bg-white border border-black px-2 py-0.5">₹{{ purchase.amount_paid }}</span>
+                                {% endif %}
+                                {% if purchase.credits_used > 0 %}
+                                    <span class="text-[10px] font-mono text-black bg-white border border-black px-2 py-0.5">
+                                        <span class="material-symbols-outlined text-[12px] align-middle">toll</span> {{ purchase.credits_used }} CR
+                                    </span>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Order Body (Toggleable) -->
-                    <div id="order-body-{{ order.id }}" class="p-4 md:p-6 {% if not forloop.first %}hidden{% endif %}">
-                        <h4 class="text-sm font-bold uppercase tracking-widest mb-4">Purchased Items</h4>
-                        <ul class="flex flex-col gap-3">
-                            {% for item in order.items.all %}
-                                <li class="p-4 border border-black/10 flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-black hover:bg-gray-50 transition-colors">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 bg-gray-100 border border-black flex items-center justify-center shrink-0 text-black">
-                                            <span class="material-symbols-outlined">description</span>
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-black leading-tight mb-1">{{ item.item.name|default:"Unknown Item" }}</p>
-                                            <p class="text-[10px] font-mono uppercase tracking-widest text-gray-500">
-                                                Qty: {{ item.quantity }} &bull; {{ item.content_type.name|default:"Item" }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full border-t border-black/10 pt-3 sm:border-t-0 sm:pt-0">
-                                        <span class="font-bold text-black border border-black px-2 py-1 text-sm bg-white">
-                                            ₹{{ item.price_at_purchase }}
-                                            {% if item.credits_at_purchase %} + {{ item.credits_at_purchase }} CR{% endif %}
-                                        </span>
-                                        <a href="{% url 'accounts:profile' %}#purchases" class="text-xs font-bold uppercase tracking-widest text-black hover:underline underline-offset-4 decoration-2">
-                                            Go to Library
-                                        </a>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                    <!-- Status + Action -->
+                    <div class="flex items-center gap-3 shrink-0 ml-auto">
+                        <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-1 border
+                            {% if purchase.status == 'paid' %}border-green-500 text-green-700 bg-green-50
+                            {% else %}border-orange-400 text-orange-700 bg-orange-50{% endif %}">
+                            {{ purchase.status|capfirst }}
+                        </span>
+                        {% if purchase.status == 'paid' and purchase.item.pdf_file %}
+                            <a href="{% url 'ecommerce:download_item' purchase.object_id %}?type={{ purchase.content_type.model }}"
+                               class="flex items-center gap-2 border border-black bg-black text-white hover:bg-white hover:text-black transition-colors px-4 h-10 text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5">
+                                <span class="material-symbols-outlined text-[16px]">download</span> Download
+                            </a>
+                        {% elif purchase.status == 'paid' %}
+                            <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">File unavailable</span>
+                        {% else %}
+                            <span class="text-[10px] font-mono text-yellow-600 uppercase tracking-widest border border-yellow-400 px-2 py-1">Pending payment</span>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Quick Links -->
+        <div class="mt-8 flex flex-wrap gap-4">
+            <a href="{% url 'ecommerce:marketplace' %}" class="flex items-center gap-2 border border-black hover:bg-black hover:text-white transition-colors px-6 h-10 text-xs font-bold uppercase tracking-widest text-black">
+                <span class="material-symbols-outlined text-[16px]">storefront</span> Marketplace
+            </a>
+            <a href="{% url 'ecommerce:order_history' %}" class="flex items-center gap-2 border border-black hover:bg-black hover:text-white transition-colors px-6 h-10 text-xs font-bold uppercase tracking-widest text-black">
+                <span class="material-symbols-outlined text-[16px]">receipt_long</span> Order History
+            </a>
+        </div>
+
     {% else %}
         <div class="flex flex-col items-center justify-center py-20 bg-gray-50 border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden group">
             <div class="absolute inset-0 bg-white -z-10 group-hover:bg-gray-50 transition-colors"></div>
@@ -101,8 +106,8 @@
                 <span class="material-symbols-outlined text-4xl text-black">package</span>
             </div>
             
-            <h3 class="text-3xl font-display font-bold uppercase tracking-tight text-black mb-2">No Past Orders Found</h3>
-            <p class="text-gray-500 font-light mb-8 max-w-md text-center">It looks like you haven't bought anything yet. Explore our comprehensive library of study materials.</p>
+            <h3 class="text-3xl font-display font-bold uppercase tracking-tight text-black mb-2">No Purchases Yet</h3>
+            <p class="text-gray-500 font-light mb-8 max-w-md text-center">You haven't purchased any study materials yet. Explore our comprehensive library of notes and papers.</p>
             
             <a href="{% url 'ecommerce:marketplace' %}" class="flex cursor-pointer items-center justify-center border border-black bg-black text-white hover:bg-white hover:text-black transition-colors h-14 px-8 text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 gap-2">
                 Browse Marketplace <span class="material-symbols-outlined text-[18px]">arrow_forward</span>

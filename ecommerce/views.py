@@ -183,7 +183,7 @@ def checkout(request):
                     messages.error(request, "This cart cannot be paid with credits.")
                     return redirect('ecommerce:checkout')
                 if request.user.credits < cart.total_credits:
-                    messages.error(f"Insufficient credits. Needed: {cart.total_credits}, You have: {request.user.credits}")
+                    messages.error(request, f"Insufficient credits. Needed: {cart.total_credits}, You have: {request.user.credits}")
                     return redirect('ecommerce:checkout')
                 request.user.credits -= cart.total_credits
                 request.user.save()
@@ -192,7 +192,7 @@ def checkout(request):
                 order.save()
                 PurchaseRequest.objects.filter(order=order).update(status='paid')
                 cart.items.all().delete()
-                del request.session['coupon_code']
+                request.session.pop('coupon_code', None)
                 messages.success(request, "Payment successful! Your downloads are ready.")
                 return redirect('accounts:profile')
             elif payment_method == 'razorpay' and request.user.is_authenticated:
@@ -247,9 +247,9 @@ def remove_coupon(request):
     return redirect(request.META.get('HTTP_REFERER', 'ecommerce:cart_view'))
 
 # ... (keep other views as is)
-@jwt_auth
-@require_POST
 @csrf_exempt
+@require_POST
+@jwt_auth
 def payment_callback(request):
     try:
         razorpay_order_id = request.POST.get('razorpay_order_id')
@@ -270,7 +270,7 @@ def payment_callback(request):
             order.paid_at = timezone.now()
             order.save()
             PurchaseRequest.objects.filter(order=order).update(status='paid')
-            cart = _get_or_create_cart(request.user)
+            cart = _get_or_create_cart(request)
             cart.items.all().delete()
         return JsonResponse({'status': 'success', 'redirect': reverse('accounts:profile')})
     except razorpay.errors.SignatureVerificationError as e:
@@ -321,14 +321,23 @@ from django.shortcuts import render
 from .models import Cart  # or whatever items you're loading
 
 def marketplace(request):
-    items = Cart.objects.all()  # change to your item model
-    paginator = Paginator(items, 10)  # 10 items per page
+    # Fetch real data for the marketplace from Note and Paper models
+    featured_notes = Note.objects.filter(is_active=True).order_by('-created_at')[:6]
+    featured_papers = Paper.objects.filter(is_active=True).select_related('branch').order_by('-created_at')[:6]
+    
+    # Calculate marketplace stats
+    from university.models import University
+    stats = {
+        'total_notes': Note.objects.filter(is_active=True).count(),
+        'total_papers': Paper.objects.filter(is_active=True).count(),
+        'total_universities': University.objects.count(),
+    }
 
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+    context = {
+        'featured_notes': featured_notes,
+        'featured_papers': featured_papers,
+        'stats': stats,
+    }
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'ecommerce/item_list.html', {'items': page_obj})
-
-    return render(request, 'ecommerce/marketplace.html', {'items': page_obj})
+    return render(request, 'ecommerce/marketplace.html', context)
 

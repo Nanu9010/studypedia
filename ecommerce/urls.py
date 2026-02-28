@@ -18,6 +18,7 @@ urlpatterns = [
 
     # User purchases
     path('my-purchases/', views.my_purchases, name='my_purchases'),
+    path('order-history/', views.order_history, name='order_history'),
     path('download/<int:item_id>/', views.download_item, name='download_item'),
     path('marketplace/', views.marketplace, name='marketplace'),
 ]
