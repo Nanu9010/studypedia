@@ -13,7 +13,7 @@ djangorestframework-simplejwt
 mysqlclient
 Pillow
 python-dotenv
-python-magic==0.4.27
+ 
 razorpay==1.4.1
 redis
 whitenoise
